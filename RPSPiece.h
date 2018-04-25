@@ -48,6 +48,11 @@ public:
         return '#';
     }
 
+    int getNumPlayer() const {
+        return this->m_num_player;
+    }
+
+    friend class RPSBoard;
 
 };
 

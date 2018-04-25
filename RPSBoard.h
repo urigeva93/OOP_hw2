@@ -2,6 +2,7 @@
 #define OOP_HW2_RPSBOARD_H
 
 #include "Board.h"
+#include "RPSProfilePlayer.h
 
 class RPSBoard : public Board {
 
@@ -28,7 +29,6 @@ private:
 
 public:
     virtual int getPlayer(const Point& pos ) const override;
-
 };
 
 
