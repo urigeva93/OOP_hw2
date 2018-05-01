@@ -1,7 +1,17 @@
-#include <iostream>
+#include "RPSGame.h"
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
+    RPSGame* game = new RPSGame();
+    game->initGame();
+    if(game->isM_game_over()) {
+        game->endGame();
+        delete(game);
+        return EXIT_SUCCESS;
+    }
+
+    game->playGame();
+    game->endGame();
+    delete(game);
+    return EXIT_SUCCESS;
 }
 

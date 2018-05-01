@@ -3,6 +3,7 @@
 
 #include "PiecePosition.h"
 #include "RPSPoint.h"
+#include "RPSMove.h"
 
 //pieces types:
 #define ROCK 'R'
@@ -29,7 +30,12 @@ public:
     RPSPiece(const RPSPiece &) = default; //default the copy constructor
     RPSPiece &operator=(const RPSPiece &) = delete; //delete operator '='
 
+    //getters
+    int getNumPlayer() const {
+        return this->m_num_player;
+    }
 
+    //functions form abstract class
     virtual const Point &getPosition() const override {
         return m_curr_pos;
     }
@@ -45,14 +51,11 @@ public:
         if(this->m_is_joker)
             return this->m_symbol;
 
-        return '#';
+        return NEUTRAL_CHAR;
     }
 
-    int getNumPlayer() const {
-        return this->m_num_player;
-    }
-
-    friend class RPSBoard;
+    friend class RPSGame;
+    friend class RPSFight;
 
 };
 

@@ -8,7 +8,7 @@
 // This interface is in use in the flow:
 // "Game" -> PlayerAlgorithm : getInitialPositions(int player, std::vector<unique_ptr<PiecePosition>>& vectorToFill);
 // PlayerAlgorithm is responsible of filling the vector sent to it with the initial positions of all his pieces
-// Note that "Game" is in parantheses because this is your class and you can choose its name
+// Note that "Game" is in parentheses because this is your class and you can choose its name
 
 // @author Amir Kirsh, TAU - Advanced Topics in Programming - 2018 Semester B
 

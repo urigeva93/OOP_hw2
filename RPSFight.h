@@ -2,8 +2,22 @@
 #define OOP_HW2_RPSFIGHT_H
 
 #include "FightInfo.h"
-#include "RPSPoint.h
+#include "RPSPoint.h"
 #include "RPSPiece.h"
+
+//fight result enum
+enum FightResult {
+    WIN_CURR_PLAYER,
+    WIN_OPP_PLAYER,
+    FLAG_EATEN_OPP_PLAYER,
+    SAME_PIECE_FIGHT,
+    BOMB_OPP_PLAYER,
+    NO_FIGHT,
+};
+
+#define TIE 0
+#define PLAYER_1 1
+#define PLAYER_2 2
 
 class RPSFight : public FightInfo {
 
@@ -23,10 +37,12 @@ public:
 
     }
 
+
+    FightResult manageFight(RPSPiece *piece_curr_player, RPSPiece *piece_opp_player) const; //manage a fight between to pieces (assumed the fight is legal!)
+
+    //functions from abstract class
     virtual const Point &getPosition() const override;
-
-    virtual char getOpponentPiece() const override;
-
+    virtual char getPiece(int player) const override;
     virtual int getWinner() const override;
 
 };

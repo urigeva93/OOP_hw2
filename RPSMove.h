@@ -5,6 +5,8 @@
 #include "RPSPoint.h"
 #include "JokerChange.h"
 
+#define NEUTRAL_CHAR '#'
+
 class RPSMove : public Move, public JokerChange {
 
 private:
@@ -18,7 +20,7 @@ public:
 
     RPSMove(RPSPoint from, RPSPoint to) : m_from(from), m_to(to), m_joker_pos(RPSPoint(-1, -1)) {
         this->m_is_joker_move = false;
-        this->m_new_rep = '#';
+        this->m_new_rep = NEUTRAL_CHAR;
     }
 
     RPSMove(RPSPoint from, RPSPoint to, char new_rep, RPSPoint m_joker_rep) : m_from(from), m_to(to),
@@ -27,6 +29,7 @@ public:
         this->m_is_joker_move = true;
     }
 
+    //functions form abstract class
     virtual const Point &getFrom() const override {
         return m_from;
     }
@@ -36,17 +39,14 @@ public:
     }
 
     virtual const Point &getJokerChangePosition() const override {
-        if (this->m_is_joker_move)
-            return this->m_joker_pos;
-
-        return RPSPoint(-1, -1);
+        return this->m_joker_pos;
     }
 
     virtual char getJokerNewRep() const override {
         if (this->m_is_joker_move)
             return this->m_new_rep;
 
-        return '#';
+        return NEUTRAL_CHAR;
     }
 
 };
