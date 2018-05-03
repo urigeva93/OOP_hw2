@@ -2,7 +2,7 @@
 #define OOP_HW2_RPSBOARD_H
 
 #include "Board.h"
-#include "RPSProfilePlayer.h"
+#include "RPSPlayerFromFile.h"
 #include "RPSFight.h"
 
 
@@ -46,7 +46,9 @@ class RPSGame : public Board {
 
 private:
 
-    RPSPiece* m_game_board[BOARD_ROWS][BOARD_COLS]; //board of the game
+    //RPSPiece* m_game_board[BOARD_ROWS][BOARD_COLS]; //board of the game
+
+    shared_ptr<RPSPiece> m_game_board[BOARD_ROWS][BOARD_COLS]; //board of the game
 
     int m_current_player; //num represents the current player (1 - P1, 2 - P2, 0 if empty)
     bool m_game_over; //flag indicates if the game is over (different reasons)
@@ -80,16 +82,16 @@ public:
         this->m_output_file.open(PATH_OUTPUT_FILE);
     }
 
-    ~RPSGame() {
-
-        //delete m_game_board
-        for (int i = 0; i < BOARD_ROWS; i++) {
-            for (int j = 0; j < BOARD_COLS; j++) {
-                if(this->m_game_board[i][j] != nullptr)
-                    delete (m_game_board[i][j]); //delete a RPSPiece
-            }
-        }
-    }
+//    ~RPSGame() {
+//
+//        //delete m_game_board
+//        for (int i = 0; i < BOARD_ROWS; i++) {
+//            for (int j = 0; j < BOARD_COLS; j++) {
+//                if(this->m_game_board[i][j] != nullptr)
+//                    delete (m_game_board[i][j]); //delete a RPSPiece
+//            }
+//        }
+//    }
 
     void initGame(); // init the game
     void playGame(); //play the game

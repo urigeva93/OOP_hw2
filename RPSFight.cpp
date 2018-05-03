@@ -30,7 +30,7 @@ int RPSFight::getWinner() const {
 
 }
 
-FightResult RPSFight::manageFight(RPSPiece *piece_curr_player, RPSPiece *piece_opp_player) const {
+FightResult RPSFight::manageFight(shared_ptr<RPSPiece> piece_curr_player, shared_ptr<RPSPiece> piece_opp_player) const {
 
     if (piece_curr_player == nullptr ||
         piece_opp_player == nullptr) //in case there aren't really 2 pieces participate in fight

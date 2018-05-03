@@ -3,11 +3,11 @@
 void RPSGame::initGame() {
 
     //create two profile for player 1 and 2
-    RPSProfilePlayer *player1 = new RPSProfilePlayer();
+    RPSPlayerFromFile *player1 = new RPSPlayerFromFile();
 
     player1->parsePosFile(PATH_POS_FILE_PLAYER1);
 
-    RPSProfilePlayer *player2 = new RPSProfilePlayer();
+    RPSPlayerFromFile *player2 = new RPSPlayerFromFile();
     player2->parsePosFile(PATH_POS_FILE_PLAYER2);
 
     if (player1->getM_pos_msg() != FILE_SUCCESS &&
@@ -741,16 +741,16 @@ void RPSGame::playGame() {
         if (line.empty())
             continue;
 
-        clean_line = RPSProfilePlayer::removeExtraSpaces(line);
-        vector <string> tokens = RPSProfilePlayer::split(clean_line, ' ');
+        clean_line = RPSPlayerFromFile::removeExtraSpaces(line);
+        vector <string> tokens = RPSPlayerFromFile::split(clean_line, ' ');
         size = tokens.size();
 
-        if ((size == 4 && RPSProfilePlayer::isStringRepInt(tokens[0]) && RPSProfilePlayer::isStringRepInt(tokens[1])
-             && RPSProfilePlayer::isStringRepInt(tokens[2]) && RPSProfilePlayer::isStringRepInt(tokens[3])) ||
-            (size == 8 && RPSProfilePlayer::isStringRepInt(tokens[0]) && RPSProfilePlayer::isStringRepInt(tokens[1])
-             && RPSProfilePlayer::isStringRepInt(tokens[2]) && RPSProfilePlayer::isStringRepInt(tokens[3]) &&
-             tokens[4] == "J:" && RPSProfilePlayer::isStringRepInt(tokens[5]) &&
-             RPSProfilePlayer::isStringRepInt(tokens[6]) &&
+        if ((size == 4 && RPSPlayerFromFile::isStringRepInt(tokens[0]) && RPSPlayerFromFile::isStringRepInt(tokens[1])
+             && RPSPlayerFromFile::isStringRepInt(tokens[2]) && RPSPlayerFromFile::isStringRepInt(tokens[3])) ||
+            (size == 8 && RPSPlayerFromFile::isStringRepInt(tokens[0]) && RPSPlayerFromFile::isStringRepInt(tokens[1])
+             && RPSPlayerFromFile::isStringRepInt(tokens[2]) && RPSPlayerFromFile::isStringRepInt(tokens[3]) &&
+             tokens[4] == "J:" && RPSPlayerFromFile::isStringRepInt(tokens[5]) &&
+             RPSPlayerFromFile::isStringRepInt(tokens[6]) &&
              (tokens[7].length() == 1 && isalpha(tokens[7][0])))) { //any move format
 
             src_col = std::stoi(tokens[0]) - 1;

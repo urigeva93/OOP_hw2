@@ -1,4 +1,4 @@
-#include "RPSProfilePlayer.h"
+#include "RPSPosParser.h"
 
 
 #define UPDATE_POS_FILE_AND_CLOSE(err, num_line) this->m_pos_msg = err; \
@@ -6,22 +6,13 @@
                                                  fin.close()
 
 
-PosFileMsg RPSProfilePlayer::getM_pos_msg() const {
-    return m_pos_msg;
+int RPSPosParser::getNumMovingPieces() const {
+    return this->m_num_of_jokers_can_move + this->m_num_of_papers + this->m_num_of_rocks + this->m_num_of_scissors;
 }
 
-int RPSProfilePlayer::getM_num_of_flags() const {
-    return this->m_num_of_flags;
-}
 
-int RPSProfilePlayer::getNumMovingPieces() const {
-    int num_all_pieces =
-            this->m_num_of_jokers_can_move + this->m_num_of_scissors + this->m_num_of_papers + this->m_num_of_rocks;
 
-    return num_all_pieces;
-}
-
-bool RPSProfilePlayer::isStringRepInt(string line) {
+bool RPSPosParser::isStringRepInt(string line) {
 
     if(line.empty())
         return false;
@@ -44,7 +35,7 @@ bool RPSProfilePlayer::isStringRepInt(string line) {
     return true;
 }
 
-string RPSProfilePlayer::removeExtraSpaces(string line) {
+string RPSPosParser::removeExtraSpaces(string line) {
 
     int size = line.size();
     if(size == 0)
@@ -77,7 +68,7 @@ string RPSProfilePlayer::removeExtraSpaces(string line) {
 
 }
 
-vector<string> RPSProfilePlayer::split(string line, char delimiter) {
+vector<string> RPSPosParser::split(string line, char delimiter) {
     vector<string> elements;
     stringstream str(line);
     string token;
@@ -88,7 +79,7 @@ vector<string> RPSProfilePlayer::split(string line, char delimiter) {
     return elements;
 }
 
-void RPSProfilePlayer::printVerboseMsg(PosFileMsg msg) {
+void RPSPosParser::printVerboseMsg(PosFileMsg msg) {
 
     if(msg == FILE_NOT_EXIST)
         cout << "ERROR POSITION FILE: file doesn't exist." << endl;
@@ -112,16 +103,11 @@ void RPSProfilePlayer::printVerboseMsg(PosFileMsg msg) {
         cout << "ERROR POSITION FILE: One or more pieces' type is not legal." << endl;
 
     if(msg == INVALID_JOKER_REP)
-        cout << "ERROR POSITION FILE: Joker new representation is not lagal." << endl;
+        cout << "ERROR POSITION FILE: Joker new representation is not legal." << endl;
 
 }
 
-void RPSProfilePlayer::setNumPlayerAccordingToFile(string path) {
-    int size = path.length();
-    this->m_num_player = path[size - 11] - '0';
-}
-
-bool RPSProfilePlayer::isValidPieceType(char piece, bool is_joker_rep) {
+bool RPSPosParser::isValidPieceType(char piece, bool is_joker_rep) {
 
     if(is_joker_rep) {
         if (piece == ROCK || piece == PAPER || piece == SCISSOR || piece == BOMB)
@@ -137,7 +123,7 @@ bool RPSProfilePlayer::isValidPieceType(char piece, bool is_joker_rep) {
 
 }
 
-bool RPSProfilePlayer::checkAndUpdateNumPiece(char piece) {
+bool RPSPosParser::checkAndUpdateNumPiece(char piece) {
 
     switch (piece) {
         case ROCK:
@@ -180,30 +166,30 @@ bool RPSProfilePlayer::checkAndUpdateNumPiece(char piece) {
     return false;
 }
 
-bool RPSProfilePlayer::isIndicesLegal(int row, int col) {
+bool RPSPosParser::isIndicesLegal(int row, int col) {
     return (row >= 0 && row < BOARD_ROWS && col >= 0 && col < BOARD_COLS);
 }
 
-bool RPSProfilePlayer::isPosEmpty(int row, int col) {
+bool RPSPosParser::isPosEmpty(int row, int col) {
     return (this->m_my_board[row][col] == nullptr);
 }
 
-void RPSProfilePlayer::setPieceOnBoard(char piece, bool is_joker, int row, int col) {
+void RPSPosParser::setPieceOnBoard(char piece, bool is_joker, int row, int col) {
 
     RPSPoint piece_loc(col, row);
-    this->m_my_board[row][col] = new RPSPiece(piece, is_joker, this->m_num_player, piece_loc);
-
+    //this->m_my_board[row][col] = new RPSPiece(piece, is_joker, this->m_num_player, piece_loc);
+    this->m_my_board[row][col] = make_unique<RPSPiece>(piece, is_joker, this->m_num_player, piece_loc);
 }
 
-bool RPSProfilePlayer::isPieceAJoker(char piece) {
+bool RPSPosParser::isPieceAJoker(char piece) {
     return piece == JOKER;
 }
 
-bool RPSProfilePlayer::allFlagsSet() {
+bool RPSPosParser::allFlagsSet() {
     return this->m_num_of_flags == NUM_OF_FLAGS;
 }
 
-void RPSProfilePlayer::parsePosFile(string path) {
+void RPSPosParser::parsePosFile(string path) {
     ifstream fin(path);
 
     if (!fin.is_open()) {
@@ -212,7 +198,6 @@ void RPSProfilePlayer::parsePosFile(string path) {
         return;
     }
 
-    setNumPlayerAccordingToFile(path);
 
     string line;
     string clean_line;
@@ -227,8 +212,8 @@ void RPSProfilePlayer::parsePosFile(string path) {
 
         line_num++;
 
-        clean_line = RPSProfilePlayer::removeExtraSpaces(line);
-        vector<string> tokens = RPSProfilePlayer::split(clean_line, ' ');
+        clean_line = RPSPosParser::removeExtraSpaces(line);
+        vector<string> tokens = RPSPosParser::split(clean_line, ' ');
         size = tokens.size();
 
         if (size == 3 && (tokens[0].length() == 1 && isalpha(tokens[0][0])) && isStringRepInt(tokens[1]) &&
@@ -309,6 +294,5 @@ void RPSProfilePlayer::parsePosFile(string path) {
 
     UPDATE_POS_FILE_AND_CLOSE(FILE_SUCCESS, -1);
 }
-
 
 
