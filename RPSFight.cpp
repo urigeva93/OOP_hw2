@@ -5,17 +5,18 @@ const Point& RPSFight::getPosition() const {
 }
 
 char RPSFight::getPiece(int player) const {
-    bool player_1_curr = this->m_curr_player == PLAYER_1;
+
+    bool player_1_curr = this->m_attacking_player == PLAYER_1;
 
     if(player == PLAYER_1) {
-        return player_1_curr ? this->m_curr_player_piece->getPiece() : this->m_opp_player_piece->getPiece();
+        return player_1_curr ? this->m_piece_type_curr_player : this->m_piece_type_opp_player;
     } else //player == PLAYER_2
-        return player_1_curr ? this->m_opp_player_piece->getPiece() : this->m_curr_player_piece->getPiece();
+        return player_1_curr ? this->m_piece_type_opp_player : this->m_piece_type_curr_player;
 }
 
 int RPSFight::getWinner() const {
 
-    FightResult res = manageFight(this->m_curr_player_piece, this->m_opp_player_piece);
+    FightResult res = manageFight();
 
     //no winner
     if(res == NO_FIGHT || res == SAME_PIECE_FIGHT || res == BOMB_OPP_PLAYER)
@@ -23,47 +24,42 @@ int RPSFight::getWinner() const {
 
     //current player wins
     if(res == FLAG_EATEN_OPP_PLAYER || res == WIN_CURR_PLAYER)
-        return this->m_curr_player;
+        return this->m_attacking_player;
 
-    //opp player wins
-    return this->m_curr_player == PLAYER_1 ? PLAYER_2 : PLAYER_1;
+    //opp player wins - WIN_OPP_PLAYER
+    return this->m_attacking_player == PLAYER_1 ? PLAYER_2 : PLAYER_1;
 
 }
 
-FightResult RPSFight::manageFight(shared_ptr<RPSPiece> piece_curr_player, shared_ptr<RPSPiece> piece_opp_player) const {
-
-    if (piece_curr_player == nullptr ||
-        piece_opp_player == nullptr) //in case there aren't really 2 pieces participate in fight
-        return NO_FIGHT;
-
+FightResult RPSFight::manageFight() const {
 
     //case 1: same pieces' type for both players
-    if (piece_curr_player->m_symbol == piece_opp_player->m_symbol)
+    if (this->m_piece_type_curr_player == this->m_piece_type_opp_player)
         return SAME_PIECE_FIGHT;
 
     //case 2: flag
-    if (piece_opp_player->m_symbol == FLAG)
+    if (this->m_piece_type_opp_player == FLAG)
         return FLAG_EATEN_OPP_PLAYER;
 
     //case 3: bombs
-    if (piece_opp_player->m_symbol == BOMB)
+    if (this->m_piece_type_opp_player == BOMB)
         return BOMB_OPP_PLAYER;
 
     //case 4: regular RPS rules
     //wins current player:
-    if ((piece_curr_player->m_symbol == ROCK && piece_opp_player->m_symbol == SCISSOR) ||
-        (piece_curr_player->m_symbol == PAPER && piece_opp_player->m_symbol == ROCK) ||
-        (piece_curr_player->m_symbol == SCISSOR && piece_opp_player->m_symbol == PAPER))
+    if ((this->m_piece_type_curr_player == ROCK && this->m_piece_type_opp_player == SCISSOR) ||
+        (this->m_piece_type_curr_player == PAPER && this->m_piece_type_opp_player == ROCK) |
+        (this->m_piece_type_curr_player == SCISSOR && this->m_piece_type_opp_player == PAPER))
         return WIN_CURR_PLAYER;
 
     //loses current player:
-    if ((piece_curr_player->m_symbol == ROCK && piece_opp_player->m_symbol == PAPER) ||
-        (piece_curr_player->m_symbol == PAPER && piece_opp_player->m_symbol == SCISSOR) ||
-        (piece_curr_player->m_symbol == SCISSOR && piece_opp_player->m_symbol == ROCK))
+    if ((this->m_piece_type_curr_player == ROCK && this->m_piece_type_opp_player == PAPER) ||
+        (this->m_piece_type_curr_player == PAPER && this->m_piece_type_opp_player == SCISSOR) ||
+        (this->m_piece_type_curr_player == SCISSOR && this->m_piece_type_opp_player- == ROCK))
         return WIN_OPP_PLAYER;
 
     //in init phase when current player has flag "fighting"
-    if (piece_curr_player->m_symbol == FLAG)
+    if (this->m_piece_type_curr_player == FLAG)
         return WIN_OPP_PLAYER;
 
     return NO_FIGHT;

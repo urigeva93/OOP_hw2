@@ -1,10 +1,10 @@
 #ifndef OOP_HW2_RPSBOARD_H
 #define OOP_HW2_RPSBOARD_H
 
-#include "Board.h"
+#include "RPSGameBoard.h"
 #include "RPSPlayerFromFile.h"
 #include "RPSFight.h"
-
+#include "RPSPosChecker.h"
 
 //reason winner msg
 enum ReasonWinner {
@@ -12,26 +12,21 @@ enum ReasonWinner {
     ALL_FLAG_CAPTURED_PLAYER_TWO,
     ALL_PIECES_EATEN_PLAYER_ONE,
     ALL_PIECES_EATEN_PLAYER_TWO,
-    ALL_FLAGS_EATEN_IN_POS_FILE,
-    ALL_PIECES_EATEN_IN_POS_FILE,
-    BAD_POS_FILE_PLAYER_ONE,
-    BAD_POS_FILE_PLAYER_TWO,
-    BAD_POS_FILE_BOTH_PLAYERS,
-    BAD_MOVE_FILE_PLAYER_ONE,
-    BAD_MOVE_FILE_PLAYER_TWO,
-    AFTER_MOVES_NO_WINNER
+    ALL_FLAGS_EATEN_IN_POS,
+    ALL_PIECES_EATEN_IN_POS,
+    BAD_POS_PLAYER_ONE,
+    BAD_POS_PLAYER_TWO,
+    BAD_POS_BOTH_PLAYERS,
+    BAD_MOVE_PLAYER_ONE,
+    BAD_MOVE_PLAYER_TWO,
+    AFTER_MOVES_NO_WINNER,
+    MOVES_LIMIT_NO_FIGHT
 };
 
 //files macro
-#define PATH_POS_FILE_PLAYER1 "./player1.rps_board"
-#define PATH_POS_FILE_PLAYER2 "./player2.rps_board"
-#define PATH_MOVE_FILE_PLAYER1 "./player1.rps_moves"
-#define PATH_MOVE_FILE_PLAYER2 "./player2.rps_moves"
 #define PATH_OUTPUT_FILE "./rps.output"
 
 //moves files errors:
-#define FILE_NOT_EXISTS "ERROR MOVE FILE: file doesn't exist.\n"
-#define BAD_FORMAT "ERROR MOVE FILE: One or more lines are in the wrong format.\n"
 #define NOT_IN_RANGE "ERROR MOVE FILE: One or more indices are out of range.\n"
 #define PIECE_NOT_EXIST "ERROR MOVE FILE: piece is not located in position required.\n"
 #define SRC_NO_CURR_PIECE "ERROR MOVE FILE: current location doesn't contains players' piece.\n"
@@ -41,72 +36,63 @@ enum ReasonWinner {
 #define NO_JOKER "ERROR MOVE FILE: the is no joker at required location.\n"
 #define NEW_REP_INVALID "ERROR MOVE FILE: new rep of joker is invalid.\n"
 
+#define MOVES_WITHOUT_FIGHT_LIMIT 100
 
-class RPSGame : public Board {
+
+class RPSGame {
 
 private:
 
-    //RPSPiece* m_game_board[BOARD_ROWS][BOARD_COLS]; //board of the game
-
-    shared_ptr<RPSPiece> m_game_board[BOARD_ROWS][BOARD_COLS]; //board of the game
+    RPSGameBoard m_board; // represents the board of the game
 
     int m_current_player; //num represents the current player (1 - P1, 2 - P2, 0 if empty)
     bool m_game_over; //flag indicates if the game is over (different reasons)
 
+    unique_ptr<PlayerAlgorithm> m_algo_player1; //Algo Player1
+    unique_ptr<PlayerAlgorithm> m_algo_player2; //Algo Player2
     int m_num_moving_pieces_player1; //num of pieces player 1 (includes jokers, without flags!)
     int m_num_moving_pieces_player2; //num of pieces player 2 (includes jokers, without flags!)
-
     int m_num_flags_player1; //num of flags player 1
     int m_num_flags_player2; //num of flags player 2
 
     //output file
     ofstream m_output_file; //stream of the output file
     ReasonWinner m_reason_winner; //reason of winning
-    int m_bad_line1_num; //bad line #1 index (if exists)
-    int m_bad_line2_num; //bad line #2 index (if exists)
+    int m_bad_input_index1; //bad action #1 index (if exists)
+    int m_bad_input_index2; //bad action #2 index (if exists)
     int m_winner; //num of the winner
-
 
 public:
 
-    RPSGame() : m_current_player(PLAYER_1), m_game_over(false), m_num_moving_pieces_player1(0), m_num_moving_pieces_player2(0),
-                m_num_flags_player1(0), m_num_flags_player2(0), m_bad_line1_num(-1), m_bad_line2_num(-1), m_winner(-1) {
+    RPSGame(unique_ptr<PlayerAlgorithm> algo_player1, unique_ptr<PlayerAlgorithm> algo_player2) : m_current_player(PLAYER_1), m_game_over(false), m_num_moving_pieces_player1(0), m_num_moving_pieces_player2(0),
+                m_num_flags_player1(0), m_num_flags_player2(0), m_bad_input_index1(-1), m_bad_input_index2(-1), m_winner(-1)  {
 
-        //init the board with NULL's
-        for (int i = 0; i < BOARD_ROWS; i++) {
-            for (int j = 0; j < BOARD_COLS; j++)
-                this->m_game_board[i][j] = nullptr;
-        }
 
         //open output file
         this->m_output_file.open(PATH_OUTPUT_FILE);
+
+        this->m_algo_player1 = std::move(algo_player1);
+        this->m_algo_player2 = std::move(algo_player2);
+
     }
 
-//    ~RPSGame() {
-//
-//        //delete m_game_board
-//        for (int i = 0; i < BOARD_ROWS; i++) {
-//            for (int j = 0; j < BOARD_COLS; j++) {
-//                if(this->m_game_board[i][j] != nullptr)
-//                    delete (m_game_board[i][j]); //delete a RPSPiece
-//            }
-//        }
-//    }
+    ~RPSGame() {
+        this->m_output_file.close();
+    }
 
     void initGame(); // init the game
     void playGame(); //play the game
     void endGame(); // end the game (by writing all details to output file)
-
-    bool isM_game_over() const;
+    bool getGameOver() const;
 
 private:
-    void checkGameStatus(); //checks the status of the game (if there is a winner or a tie)
 
+    void checkGameStatus(); //checks the status of the game (if there is a winner or a tie)
     void checkGameStatusAfterInit(); //checks the status of the game right after init phase
 
     //helper function for initGame and playGame:
-    FightResult manageFight(RPSPiece *piece_curr_player, RPSPiece *piece_opp_player); //manage a fight between to pieces (assumed the fight is legal!)
-    void updateGameAfterFight(FightResult res, RPSPiece *piece_curr_player, RPSPiece *piece_opp_player, int row, int col); //update the game and pieces after fight occur (assume legal indices!).
+    //FightResult manageFight(RPSPiece *piece_curr_player, RPSPiece *piece_opp_player); //manage a fight between to pieces (assumed the fight is legal!)
+    void updateGameAfterFight(shared_ptr<RPSPiece> piece_curr_player, shared_ptr<RPSPiece> piece_opp_player, RPSPoint fight_pos); //update the game and pieces after fight occur
 
     //validity regular moves tests
     bool isMoveOnBoard(int src_row, int src_col, int dst_row, int dst_col); //return true iff all the indices are inside board
@@ -121,7 +107,8 @@ private:
     bool isJokerNewRepValid(char new_rep); //return true iff new_rep is valid new joker rep
     bool isPieceAJoker(int row, int col); //return true iff the piece at board[x][y] is joker (assumed valid indices!)
 
-    void playRegularMove(int src_row, int src_col, int dst_row, int dst_col); //play regular move of the current player
+    //play move functions
+    bool playRegularMove(int src_row, int src_col, int dst_row, int dst_col); //play regular move of the current player (return true if there was a fight, false o/w)
     void playJokerMove(int joker_row, int joker_col, char new_rep); //play joker move of the current player.
 
     void changeCurrentPlayer(); //change the current player
@@ -130,8 +117,7 @@ private:
     void printBoard(); //print the board to output stream (assumed offset of output file exists!)
     void printReasonWinner(); //print reason of the winner (assumed offset of output file exists!)
 
-    //functions form abstract class
-    virtual int getPlayer(const Point& pos) const override;
+
 };
 
 

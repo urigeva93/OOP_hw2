@@ -3,7 +3,6 @@
 
 #include "PiecePosition.h"
 #include "RPSPoint.h"
-#include "RPSMove.h"
 
 //pieces types:
 #define ROCK 'R'
@@ -12,6 +11,10 @@
 #define BOMB 'B'
 #define JOKER 'J'
 #define FLAG 'F'
+
+//board size
+#define BOARD_ROWS 10
+#define BOARD_COLS 10
 
 class RPSPiece : public PiecePosition {
 
@@ -54,8 +57,9 @@ public:
         return NEUTRAL_CHAR;
     }
 
-    friend class RPSGame;
+    friend class RPSGameBoard;
     friend class RPSFight;
+    friend class RPSGame;
 
 };
 

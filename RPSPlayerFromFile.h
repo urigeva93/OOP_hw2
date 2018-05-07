@@ -10,72 +10,49 @@
 #include <string>
 #include <utility>
 
-#include "RPSPiece.h"
-#include "Board.h"
-#include "FightInfo.h"
+#include "RPSMove.h"
+#include "RPSPoint.h"
 #include "RPSFight.h"
-#include "Move.h"
-#include "JokerChange.h"
 
-#define BOARD_ROWS 10
-#define BOARD_COLS 10
-
-#define FILE_NOT_EXISTS "ERROR MOVE FILE: file doesn't exist.\n"
-
-
-#define NUM_OF_ROCKS 2
-#define NUM_OF_PAPERS 5
-#define NUM_OF_SCISSORS 1
-#define NUM_OF_BOMBS 2
-#define NUM_OF_JOKERS 2
-#define NUM_OF_FLAGS 1
+#define PATH_POS_FILE_PLAYER1 "./player1.rps_board"
+#define PATH_POS_FILE_PLAYER2 "./player2.rps_board"
+#define PATH_MOVE_FILE_PLAYER1 "./player1.rps_moves"
+#define PATH_MOVE_FILE_PLAYER2 "./player2.rps_moves"
 
 using namespace std;
 
-enum PosFileMsg {
-    FILE_NOT_EXIST,
-    INVALID_FORMAT,
-    EXCEED_NUM_OF_PIECE,
-    OVERLOAD_POS,
-    INDEX_OUT_OF_RANGE,
-    MISS_FLAG_PIECE,
-    INVALID_PIECE,
-    INVALID_JOKER_REP,
-    FILE_SUCCESS
-};
 
 class RPSPlayerFromFile : public PlayerAlgorithm {
 
 private:
 
-
-    //unique_ptr<RPSPiece> m_my_board[BOARD_ROWS][BOARD_COLS]; //represents the init board of the player
-
     //information about the player:
     int m_num_player;
-    int m_num_of_moving_pieces;
-    int m_num_of_flags;
-
-    vector<Move> moves;
-    vector<Move>::iterator currMove;
-
+    ifstream m_moves_file;
+    RPSMove m_curr_move;
 
 public:
 
-    RPSPlayerFromFile(int num_player) : m_num_player(num_player) {}
+    RPSPlayerFromFile(int num_player) : m_num_player(num_player), m_curr_move(RPSPoint(-1, -1), RPSPoint(-1, -1)) {
+
+        string path_to_move_file = this->m_num_player == PLAYER_1 ? PATH_MOVE_FILE_PLAYER1 : PATH_MOVE_FILE_PLAYER2;
+        this->m_moves_file.open(path_to_move_file);
+    }
+
+    ~RPSPlayerFromFile() {
+        this->m_moves_file.close();
+    }
 
     RPSPlayerFromFile(const RPSPlayerFromFile &) = delete; //delete copy constructor
 
-    RPSPlayerFromFile &operator=(const RPSPlayerFromFile &) = delete; //delete operator =
-
-    //getters
-    int getNumOfFlags() const;
-    int getNumMovingPieces() const;
+    RPSPlayerFromFile &operator=(const RPSPlayerFromFile &) = delete; //delete operator
 
 private:
 
-
-    bool parseMoveFile();
+    //static useful functions for parsing
+    static vector<string> split(string line, char delimiter); //split the line according to delimiter
+    static string removeExtraSpaces(string line); //remove extra spaces in line if exists (example: 'ab  c d' --> 'ab c d')
+    static bool isStringRepInt(string line); //returns true iff the given string represents a valid integer
 
     //functions form abstract class
     virtual void getInitialPositions(int player, std::vector <unique_ptr<PiecePosition>> &vectorToFill) override;
@@ -84,8 +61,6 @@ private:
     virtual void notifyFightResult(const FightInfo &fightInfo) override;
     virtual unique_ptr <Move> getMove() override;
     virtual unique_ptr <JokerChange> getJokerChange() override;
-
-    friend class RPSGame;
 
 };
 

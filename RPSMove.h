@@ -10,6 +10,7 @@
 class RPSMove : public Move, public JokerChange {
 
 private:
+
     RPSPoint m_from; //from point of move
     RPSPoint m_to; //to point of move
     bool m_is_joker_move; //flag is true iff the move includes joker change
@@ -48,6 +49,8 @@ public:
 
         return NEUTRAL_CHAR;
     }
+
+    friend class RPSPlayerFromFile;
 
 };
 

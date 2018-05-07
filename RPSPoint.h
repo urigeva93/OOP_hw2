@@ -12,11 +12,15 @@ public:
 
     RPSPoint(int x, int y) : m_x(x), m_y(y) {}
 
-    RPSPoint& operator=(const RPSPoint&) = default; //delete operator '='
+    RPSPoint(const Point& p) = default; //default copy constructor
+
+    RPSPoint& operator=(const RPSPoint&) = default; //default operator '='
 
     //functions form abstract class
     virtual int getX() const override {return m_x;}
     virtual int getY() const override {return m_y;}
+
+    friend class RPSGame;
 
 };
 
