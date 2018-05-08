@@ -55,7 +55,7 @@ FightResult RPSFight::manageFight() const {
     //loses current player:
     if ((this->m_piece_type_curr_player == ROCK && this->m_piece_type_opp_player == PAPER) ||
         (this->m_piece_type_curr_player == PAPER && this->m_piece_type_opp_player == SCISSOR) ||
-        (this->m_piece_type_curr_player == SCISSOR && this->m_piece_type_opp_player- == ROCK))
+        (this->m_piece_type_curr_player == SCISSOR && this->m_piece_type_opp_player == ROCK))
         return WIN_OPP_PLAYER;
 
     //in init phase when current player has flag "fighting"

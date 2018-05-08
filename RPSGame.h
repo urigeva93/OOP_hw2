@@ -64,16 +64,30 @@ private:
     int m_winner; //num of the winner
 
 public:
-
-    RPSGame(unique_ptr<PlayerAlgorithm> algo_player1, unique_ptr<PlayerAlgorithm> algo_player2) : m_current_player(PLAYER_1), m_game_over(false), m_num_moving_pieces_player1(0), m_num_moving_pieces_player2(0),
+    RPSGame(char* type_players) : m_current_player(PLAYER_1), m_game_over(false), m_num_moving_pieces_player1(0), m_num_moving_pieces_player2(0),
                 m_num_flags_player1(0), m_num_flags_player2(0), m_bad_input_index1(-1), m_bad_input_index2(-1), m_winner(-1)  {
 
 
+        //create players profile
+        if(std::strcmp(type_players, "auto-vs-file")) {
+            this->m_algo_player1 = make_unique<RPSPlayerAuto>(PLAYER_1);
+            this->m_algo_player2 = make_unique<RPSPlayerFromFile>(PLAYER_2);
+        }
+        else if(std::strcmp(type_players, "file-vs-auto")) {
+            this->m_algo_player1 = make_unique<RPSPlayerFromFile>(PLAYER_1);
+            this->m_algo_player2 = make_unique<RPSPlayerAuto>(PLAYER_2);
+        }
+        else if(std::strcmp(type_players, "file-vs-file")) {
+            this->m_algo_player1 = make_unique<RPSPlayerFromFile>(PLAYER_1);
+            this->m_algo_player2 = make_unique<RPSPlayerFromFile>(PLAYER_2);
+        }
+        else if(std::strcmp(type_players, "auto-vs-auto")) {
+            this->m_algo_player1 = make_unique<RPSPlayerAuto>(PLAYER_1);
+            this->m_algo_player2 = make_unique<RPSPlayerAuto>(PLAYER_2);
+        }
+
         //open output file
         this->m_output_file.open(PATH_OUTPUT_FILE);
-
-        this->m_algo_player1 = std::move(algo_player1);
-        this->m_algo_player2 = std::move(algo_player2);
 
     }
 

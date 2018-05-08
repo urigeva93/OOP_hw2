@@ -4,6 +4,7 @@
 #include "RPSPiece.h"
 #include <memory>
 #include <iostream>
+#include <vector>
 
 #define NUM_OF_ROCKS 2
 #define NUM_OF_PAPERS 5

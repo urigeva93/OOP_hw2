@@ -31,7 +31,7 @@ public:
     RPSPiece(char symbol, bool is_joker, int num_player, RPSPoint curr_pos) : m_symbol(symbol), m_is_joker(is_joker),
                                                                               m_num_player(num_player),
                                                                               m_curr_pos(curr_pos) {}
-    RPSPiece(const RPSPiece &) = default; //default the copy constructor
+    //RPSPiece(const RPSPiece &) = default; //default the copy constructor
     RPSPiece &operator=(const RPSPiece &) = delete; //delete operator '='
 
     //getters

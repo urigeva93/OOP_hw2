@@ -1,8 +1,5 @@
 #include "RPSGame.h"
-#include <memory>
 #include <iostream>
-
-using namespace std;
 
 int main(int argc, char* argv[]) {
 
@@ -30,7 +27,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    unique_ptr<RPSGame> game = make_unique<RPSGame>(player1, player2);
+    unique_ptr<RPSGame> game = make_unique<RPSGame>(argv[1]);
     game->initGame();
 
     if(game->getGameOver()) {

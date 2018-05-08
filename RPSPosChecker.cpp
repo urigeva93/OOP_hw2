@@ -125,12 +125,13 @@ bool RPSPosChecker::allFlagsSet() {
 void RPSPosChecker::checkInitPos(std::vector <unique_ptr<PiecePosition>>& initPosVector) {
 
     int index_piece = 0;
-    for(auto piece : initPosVector) {
+    for(vector<unique_ptr<PiecePosition>>::iterator it = initPosVector.begin(); it != initPosVector.end(); ++it) {
 
         index_piece++;
-        char piece_type = piece->getPiece();
-        char joker_rep = piece->getJokerRep(); //'#' if not a joker
-        auto piece_pos = piece->getPosition();
+        char piece_type = (*it)->getPiece();
+        char joker_rep = (*it)->getJokerRep(); //'#' if not a joker
+        int col = (*it)->getPosition().getX();
+        int row = (*it)->getPosition().getY();
 
         //validity checks
         if(isPieceAJoker(piece_type)) {
@@ -141,20 +142,20 @@ void RPSPosChecker::checkInitPos(std::vector <unique_ptr<PiecePosition>>& initPo
                 return;
             }
         } else {
-            if(isValidPieceType(piece->getPiece(), false) == false) {
+            if(isValidPieceType(piece_type, false) == false) {
                 printVerboseMsg(INVALID_PIECE);
                 UPDATE_STATUS(INVALID_PIECE, index_piece);
                 return;
             }
         }
 
-        if(isIndicesLegal(piece_pos.getY(), piece_pos.getX()) == false) {
+        if(isIndicesLegal(row, col) == false) {
             printVerboseMsg(INDEX_OUT_OF_RANGE);
             UPDATE_STATUS(INDEX_OUT_OF_RANGE, index_piece);
             return;
         }
 
-        if(isPosEmpty(piece_pos.getY(), piece_pos.getX()) == false) {
+        if(isPosEmpty(row, col) == false) {
             printVerboseMsg(OVERLOAD_POS);
             UPDATE_STATUS(OVERLOAD_POS, index_piece);
             return;
@@ -165,13 +166,14 @@ void RPSPosChecker::checkInitPos(std::vector <unique_ptr<PiecePosition>>& initPo
             UPDATE_STATUS(EXCEED_NUM_OF_PIECE, index_piece);
             return;
         }
+
         //check if joker rep can move (i.e not a bomb)
         if(joker_rep == ROCK || joker_rep == PAPER || joker_rep == SCISSOR)
             this->m_num_of_jokers_can_move++;
 
 
         //now we can set the piece on board
-        setPieceOnBoard(piece_pos.getY(), piece_pos.getX());
+        setPieceOnBoard(row, col);
     }
 
     if(allFlagsSet() == false) {

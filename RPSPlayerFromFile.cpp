@@ -102,7 +102,7 @@ void RPSPlayerFromFile::getInitialPositions(int player, std::vector<unique_ptr<P
             col = std::stoi(tokens[1]) - 1;
             row = std::stoi(tokens[2]) - 1;
 
-            p_piece = make_unique<RPSPiece>(piece, false, player, this->m_num_player, RPSPoint(col, row));
+            p_piece = make_unique<RPSPiece>(piece, false, this->m_num_player, RPSPoint(col, row));
 
         } else if (size == 4 && tokens[0].length() == 1 && tokens[0][0] == JOKER &&
                    isStringRepInt(tokens[1]) &&
@@ -113,14 +113,14 @@ void RPSPlayerFromFile::getInitialPositions(int player, std::vector<unique_ptr<P
             col = std::stoi(tokens[1]) - 1;
             row = std::stoi(tokens[2]) - 1;
 
-            p_piece = make_unique<RPSPiece>(piece, true, player, this->m_num_player, RPSPoint(col, row));
+            p_piece = make_unique<RPSPiece>(piece, true, this->m_num_player, RPSPoint(col, row));
 
         } else  //bad format line - make a bad position
             p_piece = make_unique<RPSPiece>(NEUTRAL_CHAR, false, this->m_num_player, RPSPoint(-1, -1));
 
 
         //push the current piece created by line to vectorToFIll
-        vectorToFill.push_back(p_piece);
+        vectorToFill.push_back(std::move(p_piece));
     }
 
 }
