@@ -72,12 +72,14 @@ public:
 
     //get initial_pos helper
     void setPieceOnBoard(char piece, bool is_joker, int row, int col);
-    bool checkAndUpdateNumPiece(char piece);
+    //bool checkAndUpdateNumPiece(char piece);
     void updateNumPiece(char piece);
 
     // helper functions
     char getPieceFromBoard(Point& position);
+    void removeFromVector(int type_vector, const RPSPoint& pos);
     friend class RPSGame;
+
 
 
 
