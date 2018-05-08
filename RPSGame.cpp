@@ -18,8 +18,6 @@ void RPSGame::initGame() {
     bool is_piece_joker;
     char real_piece_type;
     int row, col;
-    Point piece_pos;
-
 
     if (checker_player1.getPosMsg() != POS_SUCCESS &&
         checker_player2.getPosMsg() != POS_SUCCESS) { //both players with invalid position files
@@ -75,40 +73,38 @@ void RPSGame::initGame() {
     std::vector<unique_ptr<FightInfo>> fights_pos;
     int winner_fight = 0;
 
-    for (auto piece_p1 : pos_player_1) {
+    for (vector<unique_ptr<PiecePosition>>::iterator it = pos_player_1.begin(); it != pos_player_1.end(); ++it) {
 
-        piece_pos = piece_p1->getPosition();
-        row = piece_pos.getY();
-        col = piece_pos.getX();
+        row = (*it)->getPosition().getY();
+        col = (*it)->getPosition().getX();
 
-        RPSPoint pos(piece_pos.getY(), piece_pos.getX());
-        is_piece_joker = piece_p1->getPiece() == JOKER;
-        real_piece_type = is_piece_joker ? piece_p1->getJokerRep() : piece_p1->getPiece();
+        RPSPoint pos(col, row);
+        is_piece_joker = (*it)->getPiece() == JOKER;
+        real_piece_type = is_piece_joker ? (*it)->getJokerRep() : (*it)->getPiece();
 
         shared_ptr<RPSPiece> my_piece_p1 = make_shared<RPSPiece>(real_piece_type, is_piece_joker, PLAYER_1, pos);
-        this->m_board->m_game_board[row][col] = my_piece_p1;
+        this->m_board.m_game_board[row][col] = my_piece_p1;
     }
 
-    for (auto piece_p2 : pos_player_2) {
+    for (vector<unique_ptr<PiecePosition>>::iterator it = pos_player_2.begin(); it != pos_player_2.end(); ++it) {
 
-        piece_pos = piece_p2->getPosition();
-        row = piece_pos.getY();
-        col = piece_pos.getX();
+        row = (*it)->getPosition().getY();
+        col = (*it)->getPosition().getX();
 
-        RPSPoint pos(piece_pos.getY(), piece_pos.getX());
-        is_piece_joker = piece_p2->getPiece() == JOKER;
-        real_piece_type = is_piece_joker ? piece_p2->getJokerRep() : piece_p2->getPiece();
+        RPSPoint pos(col, row);
+        is_piece_joker = (*it)->getPiece() == JOKER;
+        real_piece_type = is_piece_joker ? (*it)->getJokerRep() : (*it)->getPiece();
 
         shared_ptr<RPSPiece> my_piece_p2 = make_shared<RPSPiece>(real_piece_type, is_piece_joker, PLAYER_2, pos);
 
-        auto piece_p1 = this->m_board->m_game_board[piece_pos.getY()][piece_pos.getX()];
+        auto piece_p1 = this->m_board.m_game_board[row][col];
         if (piece_p1 == nullptr) //the curr entrance is empty and can set player 2 in it
-            this->m_board->m_game_board[row][col] = my_piece_p2;
+            this->m_board.m_game_board[row][col] = my_piece_p2;
         else { //the curr entrance isn't empty, need to make a fight
 
             unique_ptr<FightInfo> fight = make_unique<RPSFight>(piece_p1->m_symbol, real_piece_type, pos, PLAYER_1);
-            updateGameAfterFight(piece_p1, piece_p2, pos);
-            fights_pos.push_back(fight);
+            updateGameAfterFight(piece_p1, my_piece_p2, pos);
+            fights_pos.emplace_back(fight);
         }
     }
 
@@ -205,7 +201,7 @@ void RPSGame::updateGameAfterFight(shared_ptr<RPSPiece> piece_curr_player, share
     bool player_1_current = (this->m_current_player == PLAYER_1);
 
     if (res == SAME_PIECE_FIGHT) {
-        this->m_board->m_game_board[row][col] = nullptr;
+        this->m_board.m_game_board[row][col] = nullptr;
         if (piece_curr_player->m_symbol == FLAG) {
             this->m_num_flags_player1--;
             this->m_num_flags_player2--;
@@ -219,7 +215,7 @@ void RPSGame::updateGameAfterFight(shared_ptr<RPSPiece> piece_curr_player, share
     }
 
     if (res == BOMB_OPP_PLAYER) {
-        this->m_board->m_game_board[row][col] = nullptr;
+        this->m_board.m_game_board[row][col] = nullptr;
         if (piece_curr_player->m_symbol == FLAG) {
             if (player_1_current)
                 this->m_num_flags_player1--;
@@ -239,7 +235,7 @@ void RPSGame::updateGameAfterFight(shared_ptr<RPSPiece> piece_curr_player, share
     if (res == WIN_CURR_PLAYER) {
         piece_curr_player->m_curr_pos.m_x = col;
         piece_curr_player->m_curr_pos.m_y = row;
-        this->m_board->m_game_board[row][col] = piece_curr_player;
+        this->m_board.m_game_board[row][col] = piece_curr_player;
         if (piece_opp_player->m_symbol == FLAG) {
             if (player_1_current)
                 this->m_num_flags_player2--;
@@ -259,7 +255,7 @@ void RPSGame::updateGameAfterFight(shared_ptr<RPSPiece> piece_curr_player, share
 
     if (res == WIN_OPP_PLAYER) {
 
-        this->m_board->m_game_board[row][col] = piece_opp_player;
+        this->m_board.m_game_board[row][col] = piece_opp_player;
         if (piece_curr_player->m_symbol == FLAG) {
             if (player_1_current)
                 this->m_num_flags_player1--;
@@ -278,11 +274,11 @@ void RPSGame::updateGameAfterFight(shared_ptr<RPSPiece> piece_curr_player, share
 
     if (res == FLAG_EATEN_OPP_PLAYER) {
         if (piece_curr_player->m_symbol == BOMB)
-            this->m_board->m_game_board[row][col] = nullptr;
+            this->m_board.m_game_board[row][col] = nullptr;
         else {
             piece_curr_player->m_curr_pos.m_x = col;
             piece_curr_player->m_curr_pos.m_y = row;
-            this->m_board->m_game_board[row][col] = piece_curr_player;
+            this->m_board.m_game_board[row][col] = piece_curr_player;
         }
         if (player_1_current)
             this->m_num_flags_player2--;
@@ -312,7 +308,7 @@ bool RPSGame::isPieceAbleToMove(char piece) {
 
 bool RPSGame::isSamePieceAsCurrent(int row, int col) {
 
-    shared_ptr<RPSPiece> piece = this->m_board->m_game_board[row][col];
+    shared_ptr<RPSPiece> piece = this->m_board.m_game_board[row][col];
     if (piece == nullptr)
         return false;
     return (piece->m_num_player == this->m_current_player);
@@ -328,7 +324,7 @@ bool RPSGame::isJokerNewRepValid(char new_rep) {
 
 bool RPSGame::isPieceAJoker(int row, int col) {
 
-    shared_ptr<RPSPiece> piece = this->m_board->m_game_board[row][col];
+    shared_ptr<RPSPiece> piece = this->m_board.m_game_board[row][col];
     if (piece == nullptr)
         return false;
     return (piece->m_is_joker == true);
@@ -380,7 +376,7 @@ bool RPSGame::playRegularMove(int src_row, int src_col, int dst_row, int dst_col
         return false;
     }
 
-    shared_ptr<RPSPiece> piece = this->m_board->m_game_board[src_row][src_col];
+    shared_ptr<RPSPiece> piece = this->m_board.m_game_board[src_row][src_col];
 
     //checks if the piece at src location able to move
     if (!isPieceAbleToMove(piece->m_symbol)) {
@@ -425,16 +421,16 @@ bool RPSGame::playRegularMove(int src_row, int src_col, int dst_row, int dst_col
     }
 
     //the move is valid! thus we can play
-    if (this->m_board->m_game_board[dst_row][dst_col] == nullptr) { //regular move
-        this->m_board->m_game_board[dst_row][dst_col] = this->m_board->m_game_board[src_row][src_col];
+    if (this->m_board.m_game_board[dst_row][dst_col] == nullptr) { //regular move
+        this->m_board.m_game_board[dst_row][dst_col] = this->m_board.m_game_board[src_row][src_col];
 
-        this->m_board->m_game_board[src_row][src_col] = nullptr;
+        this->m_board.m_game_board[src_row][src_col] = nullptr;
     } else { //two pieces fight!
 
         RPSPoint fight_pos(dst_col, dst_row);
-        updateGameAfterFight(this->m_board->m_game_board[src_row][src_col],
-                             this - m_board->m_game_board[dst_row][dst_col], fight_pos);
-        this->m_board->m_game_board[src_row][src_col] = nullptr;
+        updateGameAfterFight(this->m_board.m_game_board[src_row][src_col],
+                             this->m_board.m_game_board[dst_row][dst_col], fight_pos);
+        this->m_board.m_game_board[src_row][src_col] = nullptr;
         return true;
     }
 
@@ -516,9 +512,9 @@ void RPSGame::playJokerMove(int joker_row, int joker_col, char new_rep) {
         return;
     }
 
-    char orig_rep = this->m_board->m_game_board[joker_row][joker_col]->m_symbol;
+    char orig_rep = this->m_board.m_game_board[joker_row][joker_col]->m_symbol;
     //the joker move is valid!, thus we can change it
-    this->m_board->m_game_board[joker_row][joker_col]->m_symbol = new_rep;
+    this->m_board.m_game_board[joker_row][joker_col]->m_symbol = new_rep;
 
     //check if the joker rep has changed from piece that can move to a non one and vice versa, and set attribute accordingly
     if (orig_rep != BOMB && new_rep == BOMB) {
@@ -544,22 +540,22 @@ void RPSGame::changeCurrentPlayer() {
 }
 
 bool RPSGame::isPieceExist(int row, int col) {
-    return (this->m_board->m_game_board[row][col] != nullptr);
+    return (this->m_board.m_game_board[row][col] != nullptr);
 }
 
 void RPSGame::printBoard() {
 
     for (int i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
-            if (this->m_board->m_game_board[i][j] == nullptr)
+            if (this->m_board.m_game_board[i][j] == nullptr)
                 this->m_output_file << " ";
-            else if (this->m_board->m_game_board[i][j]->m_is_joker == false) { //regular piece
-                if (this->m_board->m_game_board[i][j]->m_num_player == PLAYER_1) //Capital letters
-                    this->m_output_file << this->m_board->m_game_board[i][j]->m_symbol;
+            else if (this->m_board.m_game_board[i][j]->m_is_joker == false) { //regular piece
+                if (this->m_board.m_game_board[i][j]->m_num_player == PLAYER_1) //Capital letters
+                    this->m_output_file << this->m_board.m_game_board[i][j]->m_symbol;
                 else
-                    this->m_output_file << (char) std::tolower(this->m_board->m_game_board[i][j]->m_symbol);
+                    this->m_output_file << (char) std::tolower(this->m_board.m_game_board[i][j]->m_symbol);
             } else { //joker piece
-                if (this->m_board->m_game_board[i][j]->m_num_player == PLAYER_1) //Capital letters
+                if (this->m_board.m_game_board[i][j]->m_num_player == PLAYER_1) //Capital letters
                     this->m_output_file << JOKER;
                 else
                     this->m_output_file << (char) std::tolower(JOKER);
@@ -755,8 +751,9 @@ void RPSGame::playGame() {
 
         //handle if was a fight
         if (was_fight) {
-            RPSFight curr_fight(this->m_board->m_game_board[src_row][src_col]->m_symbol,
-                                this->m_board->m_game_board[src_row][src_col]->m_symbol, curr_move->getTo(),
+            RPSPoint fight_pos(curr_move->getTo().getX(), curr_move->getTo().getY());
+            RPSFight curr_fight(this->m_board.m_game_board[src_row][src_col]->m_symbol,
+                                this->m_board.m_game_board[src_row][src_col]->m_symbol, fight_pos,
                                 this->m_current_player);
 
             if(player1_current)
@@ -788,16 +785,18 @@ void RPSGame::playGame() {
         if (player1_current) {
             this->m_algo_player2->notifyOnOpponentMove(*curr_move);
             if (was_fight) {
-                RPSFight curr_fight(this->m_board->m_game_board[src_row][src_col]->m_symbol,
-                                    this->m_board->m_game_board[src_row][src_col]->m_symbol, curr_move->getTo(),
+                RPSPoint fight_pos(curr_move->getTo().getX(), curr_move->getTo().getY());
+                RPSFight curr_fight(this->m_board.m_game_board[src_row][src_col]->m_symbol,
+                                    this->m_board.m_game_board[src_row][src_col]->m_symbol, fight_pos,
                                     this->m_current_player);
                 this->m_algo_player2->notifyFightResult(curr_fight);
             }
         } else {
             this->m_algo_player1->notifyOnOpponentMove(*curr_move);
             if(was_fight) {
-                RPSFight curr_fight(this->m_board->m_game_board[src_row][src_col]->m_symbol,
-                                    this->m_board->m_game_board[src_row][src_col]->m_symbol, curr_move->getTo(),
+                RPSPoint fight_pos(curr_move->getTo().getX(), curr_move->getTo().getY());
+                RPSFight curr_fight(this->m_board.m_game_board[src_row][src_col]->m_symbol,
+                                    this->m_board.m_game_board[src_row][src_col]->m_symbol, fight_pos,
                                     this->m_current_player);
                 this->m_algo_player1->notifyFightResult(curr_fight);
             }

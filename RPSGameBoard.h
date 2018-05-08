@@ -31,6 +31,8 @@ public:
         return this->m_game_board[row][col]->getNumPlayer();
     }
 
+    friend class RPSGame;
+
 };
 
 

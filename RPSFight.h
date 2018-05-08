@@ -32,7 +32,7 @@ private:
 
 public:
 
-    RPSFight(char piece_type_curr_player, char piece_type_opp_player, Point fight_pos, int attacking_player)
+    RPSFight(char piece_type_curr_player, char piece_type_opp_player, RPSPoint fight_pos, int attacking_player)
             : m_piece_type_curr_player(piece_type_curr_player),
               m_piece_type_opp_player(piece_type_opp_player),
               m_fight_pos(fight_pos),

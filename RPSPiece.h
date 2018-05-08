@@ -11,6 +11,7 @@
 #define BOMB 'B'
 #define JOKER 'J'
 #define FLAG 'F'
+#define NEUTRAL_CHAR '#'
 
 //board size
 #define BOARD_ROWS 10

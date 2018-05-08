@@ -3,6 +3,7 @@
 
 #include "RPSGameBoard.h"
 #include "RPSPlayerFromFile.h"
+#include "RPSPlayerAuto.h"
 #include "RPSFight.h"
 #include "RPSPosChecker.h"
 

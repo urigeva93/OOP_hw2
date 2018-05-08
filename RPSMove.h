@@ -5,8 +5,6 @@
 #include "RPSPoint.h"
 #include "JokerChange.h"
 
-#define NEUTRAL_CHAR '#'
-
 class RPSMove : public Move, public JokerChange {
 
 private:

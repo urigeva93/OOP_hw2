@@ -2,6 +2,7 @@
 #define OOP_HW2_RPSPLAYERAUTO_H
 
 #include "PlayerAlgorithm.h"
+#include "RPSPiece.h"
 
 class RPSPlayerAuto : public PlayerAlgorithm {
 
@@ -22,8 +23,8 @@ private:
 
 public:
 
-    RPSPlayerAuto() : m_num_of_rocks(0), m_num_of_papers(0), m_num_of_scissors(0),
-                      m_num_of_bombs(0), m_num_of_jokers(0), m_num_of_flags(0), m_num_of_jokers_can_move(0) {
+    RPSPlayerAuto(int num_player) : m_num_of_rocks(0), m_num_of_papers(0), m_num_of_scissors(0),
+                      m_num_of_bombs(0), m_num_of_jokers(0), m_num_of_flags(0), m_num_of_jokers_can_move(0), m_num_player(num_player) {
 
         //init m_my_board with nullptr
         for (int i = 0; i < BOARD_ROWS; i++) {

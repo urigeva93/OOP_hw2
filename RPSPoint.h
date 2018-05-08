@@ -3,6 +3,8 @@
 
 #include "Point.h"
 
+#define NEUTRAL_CHAR '#'
+
 class RPSPoint : public Point {
 
     int m_x; // represents ***column*** on board
@@ -12,7 +14,7 @@ public:
 
     RPSPoint(int x, int y) : m_x(x), m_y(y) {}
 
-    RPSPoint(const Point& p) = default; //default copy constructor
+    //RPSPoint(const Point& p) = default; //default copy constructor
 
     RPSPoint& operator=(const RPSPoint&) = default; //default operator '='
 
