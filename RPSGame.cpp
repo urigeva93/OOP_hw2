@@ -71,7 +71,6 @@ void RPSGame::initGame() {
     this->m_num_moving_pieces_player1 = checker_player2.getNumMovingPieces();
 
     std::vector<unique_ptr<FightInfo>> fights_pos;
-    int winner_fight = 0;
 
     for (vector<unique_ptr<PiecePosition>>::iterator it = pos_player_1.begin(); it != pos_player_1.end(); ++it) {
 
@@ -104,7 +103,7 @@ void RPSGame::initGame() {
 
             unique_ptr<FightInfo> fight = make_unique<RPSFight>(piece_p1->m_symbol, real_piece_type, pos, PLAYER_1);
             updateGameAfterFight(piece_p1, my_piece_p2, pos);
-            fights_pos.emplace_back(fight);
+            fights_pos.push_back(std::move(fight));
         }
     }
 
@@ -696,9 +695,9 @@ void RPSGame::playGame() {
     int num_move_player1 = 0;
     int num_move_player2 = 0;
     int count_moves_till_fight = 0;
-    bool player1_moves_over, player2_moves_over;
+    bool player1_moves_over = false, player2_moves_over = false;
     bool player1_current, was_fight;
-    int size = 0, src_row, src_col, dst_row, dst_col, joker_row, joker_col;
+    int src_row, src_col, dst_row, dst_col, joker_row, joker_col;
     unique_ptr<Move> curr_move;
     unique_ptr<JokerChange> curr_joker_change;
     char new_rep;
