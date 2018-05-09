@@ -189,13 +189,13 @@ unique_ptr<Move> RPSPlayerFromFile::getMove() {
 
             RPSMove move(RPSPoint(src_col, src_row), RPSPoint(dst_col, dst_row), new_rep, RPSPoint(joker_col, joker_row));
             this->m_curr_move = move;
-            p_move = make_unique<RPSMove>(RPSPoint(src_col, src_row), RPSPoint(dst_col, dst_row));
+            p_move = make_unique<RPSMove>(RPSPoint(src_col, src_row), RPSPoint(dst_col, dst_row), new_rep, RPSPoint(joker_col, joker_row));
 
         //bad format - enter an invalid move
         } else {
             RPSMove move(RPSPoint(-1, -1), RPSPoint(-1, -1));
             this->m_curr_move = move;
-            p_move = make_unique<RPSMove>(RPSPoint(src_col, src_row), RPSPoint(dst_col, dst_row));
+            p_move = make_unique<RPSMove>(RPSPoint(-1, -1), RPSPoint(-1, -1));
 
         }
 

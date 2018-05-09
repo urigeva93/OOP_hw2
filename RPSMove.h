@@ -22,9 +22,9 @@ public:
         this->m_new_rep = NEUTRAL_CHAR;
     }
 
-    RPSMove(RPSPoint from, RPSPoint to, char new_rep, RPSPoint m_joker_rep) : m_from(from), m_to(to),
+    RPSMove(RPSPoint from, RPSPoint to, char new_rep, RPSPoint joker_pos) : m_from(from), m_to(to),
                                                                               m_new_rep(new_rep),
-                                                                              m_joker_pos(m_joker_rep) {
+                                                                              m_joker_pos(joker_pos) {
         this->m_is_joker_move = true;
     }
 

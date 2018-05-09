@@ -53,17 +53,15 @@ public:
         }
     }
 
-
-    static void printVerboseMsg(PosMsg msg); //print error verbosely
-
     int getNumMovingPieces() const;
     int getNumOfFlags() const;
     int getPosMsg() const;
     int getInvalidNumPiece() const;
-
-
     void checkInitPos(std::vector <unique_ptr<PiecePosition>> &initPosVector); // parse the Position File, and set the fields accordingly
 
+private:
+
+    static void printVerboseMsg(PosMsg msg); //print error verbosely
     //helper function for checkInitPos() function
     bool isValidPieceType(char piece, bool is_joker_rep); //returns true if the piece symbol given is valid (for regular piece or joker)
     bool checkAndUpdateNumPiece(char piece); //check if the piece type exceeds it's number: if not, update it and return true, false o/w (assumed the piece type is valid!)
