@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    //create the game accordingly. Then, init, play and end the game
     unique_ptr<RPSGame> game = make_unique<RPSGame>(player1, player2);
     game->initGame();
     game->playGame();

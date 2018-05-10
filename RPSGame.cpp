@@ -21,7 +21,6 @@ void RPSGame::initGame() {
 
     if (checker_player1.getPosMsg() != POS_SUCCESS &&
         checker_player2.getPosMsg() != POS_SUCCESS) { //both players with invalid position files
-
         this->m_reason_winner = BAD_POS_BOTH_PLAYERS;
         this->m_winner = TIE;
         this->m_game_over = true;
@@ -29,20 +28,16 @@ void RPSGame::initGame() {
         this->m_bad_input_index2 = checker_player2.getInvalidNumPiece();
         return;
     }
-
     if (checker_player1.getPosMsg() != POS_SUCCESS &&
         checker_player2.getPosMsg() == POS_SUCCESS) { //only player 1 with invalid position
-
         this->m_reason_winner = BAD_POS_BOTH_PLAYERS;
         this->m_winner = TIE;
         this->m_game_over = true;
         this->m_bad_input_index1 = checker_player1.getInvalidNumPiece();
         return;
     }
-
     if (checker_player1.getPosMsg() == POS_SUCCESS &&
         checker_player2.getPosMsg() != POS_SUCCESS) { //only player 2 with invalid position
-
         this->m_reason_winner = BAD_POS_PLAYER_TWO;
         this->m_winner = PLAYER_1;
         this->m_game_over = true;
@@ -50,18 +45,15 @@ void RPSGame::initGame() {
         return;
     }
 
-
     //both players with valid position. Place player1 pieces on board, then iterate player2' pieces, place his pieces
     //and manage a fight if needed.
 
-    //first, update game attributes
     this->m_num_flags_player1 = checker_player1.getNumOfFlags();
     this->m_num_flags_player2 = checker_player2.getNumOfFlags();
     this->m_num_moving_pieces_player1 = checker_player1.getNumMovingPieces();
     this->m_num_moving_pieces_player2 = checker_player2.getNumMovingPieces();
 
     std::vector<unique_ptr<FightInfo>> fights_pos;
-
     for (vector<unique_ptr<PiecePosition>>::iterator it = pos_player_1.begin(); it != pos_player_1.end(); ++it) {
 
         row = (*it)->getPosition().getY();
@@ -74,7 +66,6 @@ void RPSGame::initGame() {
         shared_ptr<RPSPiece> my_piece_p1 = make_shared<RPSPiece>(real_piece_type, is_piece_joker, PLAYER_1, pos);
         this->m_board.m_game_board[row][col] = my_piece_p1;
     }
-
     for (vector<unique_ptr<PiecePosition>>::iterator it = pos_player_2.begin(); it != pos_player_2.end(); ++it) {
 
         row = (*it)->getPosition().getY();
@@ -96,7 +87,6 @@ void RPSGame::initGame() {
             fights_pos.push_back(std::move(fight));
         }
     }
-
     checkGameStatusAfterInit();
     if (this->m_game_over)
         return;
@@ -104,7 +94,6 @@ void RPSGame::initGame() {
     //notify players pos level has ended
     this->m_algo_player1->notifyOnInitialBoard(this->m_board, fights_pos);
     this->m_algo_player2->notifyOnInitialBoard(this->m_board, fights_pos);
-
 }
 
 void RPSGame::checkGameStatusAfterInit() {
@@ -178,7 +167,7 @@ void RPSGame::checkGameStatus() {
 
 }
 
-void RPSGame::updateGameAfterFight(shared_ptr<RPSPiece>& piece_curr_player, shared_ptr<RPSPiece>& piece_opp_player,
+void RPSGame::updateGameAfterFight(shared_ptr<RPSPiece> piece_curr_player, shared_ptr<RPSPiece> piece_opp_player,
                                    RPSPoint fight_pos) {
 
     int row = fight_pos.getY();
@@ -243,7 +232,8 @@ void RPSGame::updateGameAfterFight(shared_ptr<RPSPiece>& piece_curr_player, shar
     }
 
     if (res == WIN_OPP_PLAYER) {
-
+        piece_opp_player->m_curr_pos.m_x = col;
+        piece_opp_player->m_curr_pos.m_y = row;
         this->m_board.m_game_board[row][col] = piece_opp_player;
         if (piece_curr_player->m_symbol == FLAG) {
             if (player_1_current)
@@ -275,8 +265,6 @@ void RPSGame::updateGameAfterFight(shared_ptr<RPSPiece>& piece_curr_player, shar
             this->m_num_flags_player1--;
 
     }
-    return;
-
 }
 
 bool RPSGame::isInBoard(int row, int col) const {
@@ -592,11 +580,9 @@ void RPSGame::printReasonWinner() {
     }
 
     if (this->m_reason_winner == MOVES_LIMIT_NO_FIGHT) {
-        this->m_output_file << "A tie - no fight occured for move than 100 turns" << endl;
+        this->m_output_file << "A tie - no fight occurred for move than 100 turns" << endl;
         return;
     }
-
-
 }
 
 void RPSGame::endGame() {
@@ -648,13 +634,9 @@ bool RPSGame::isMoveLegal(int src_row, int src_col, int dst_row, int dst_col) {
         if (moves[i].first == dst_row && moves[i].second == dst_col)
             return true;
     }
-
     return false;
 }
 
-bool RPSGame::getIsGameOver() const {
-    return this->m_game_over;
-}
 
 void RPSGame::playGame() {
 
@@ -680,6 +662,7 @@ void RPSGame::playGame() {
         //check if number of moves without a fight is bigger than limit and if so end the game with tie.
         if (count_moves_till_fight > MOVES_WITHOUT_FIGHT_LIMIT) {
             this->m_reason_winner = MOVES_LIMIT_NO_FIGHT;
+            this->m_winner = TIE;
             this->m_game_over = true;
             continue;
         }
@@ -710,14 +693,15 @@ void RPSGame::playGame() {
         //if there is am move, do it
         src_row = curr_move->getFrom().getY();
         src_col = curr_move->getFrom().getX();
-        real_piece_type_curr = (this->m_board.m_game_board[src_row][src_col] != nullptr) ? this->m_board.m_game_board[src_row][src_col]->m_symbol : NEUTRAL_CHAR;
+        real_piece_type_curr = (this->m_board.m_game_board[src_row][src_col] != nullptr)
+                               ? this->m_board.m_game_board[src_row][src_col]->m_symbol : NEUTRAL_CHAR;
 
         dst_row = curr_move->getTo().getY();
         dst_col = curr_move->getTo().getX();
-        real_piece_type_opp = (this->m_board.m_game_board[dst_row][dst_col] != nullptr) ? this->m_board.m_game_board[dst_row][dst_col]->m_symbol : NEUTRAL_CHAR;
+        real_piece_type_opp = (this->m_board.m_game_board[dst_row][dst_col] != nullptr)
+                              ? this->m_board.m_game_board[dst_row][dst_col]->m_symbol : NEUTRAL_CHAR;
 
         was_fight = playRegularMove(src_row, src_col, dst_row, dst_col);
-
         if (this->m_game_over) {
             this->m_bad_input_index1 = num_move_player1;
             continue;
@@ -730,13 +714,12 @@ void RPSGame::playGame() {
                                 real_piece_type_opp, fight_pos,
                                 this->m_current_player);
 
-            if(player1_current)
+            if (player1_current)
                 this->m_algo_player1->notifyFightResult(curr_fight);
             else
                 this->m_algo_player2->notifyFightResult(curr_fight);
 
             count_moves_till_fight = 0;
-
         }
 
         //do a joker change if exists
@@ -752,22 +735,21 @@ void RPSGame::playGame() {
                 this->m_bad_input_index1 = num_move_player1;
                 continue;
             }
-
         }
 
         //notify the opponent about the move
-        if(player1_current)
+        if (player1_current)
             this->m_algo_player2->notifyOnOpponentMove(*curr_move);
         else
             this->m_algo_player1->notifyOnOpponentMove(*curr_move);
 
-        if(was_fight) {
+        if (was_fight) {
             RPSPoint fight_pos(curr_move->getTo().getX(), curr_move->getTo().getY());
             RPSFight curr_fight(real_piece_type_curr,
                                 real_piece_type_opp, fight_pos,
                                 this->m_current_player);
 
-            if(player1_current)
+            if (player1_current)
                 this->m_algo_player1->notifyFightResult(curr_fight);
             else
                 this->m_algo_player2->notifyFightResult(curr_fight);
@@ -779,7 +761,7 @@ void RPSGame::playGame() {
 
     } //end loop game
 
-    //check if both files finished and there is no winner
+    //check if both moves finished and there is still no winner
     if (this->m_game_over == false && player1_moves_over == true && player2_moves_over == true) {
         this->m_reason_winner = AFTER_MOVES_NO_WINNER;
         this->m_winner = TIE;

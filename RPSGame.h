@@ -24,10 +24,8 @@ enum ReasonWinner {
     MOVES_LIMIT_NO_FIGHT
 };
 
-//files macro
 #define PATH_OUTPUT_FILE "./rps.output"
 
-//moves files errors:
 #define NOT_IN_RANGE "ERROR MOVE: One or more indices are out of range.\n"
 #define PIECE_NOT_EXIST "ERROR MOVE: piece is not located in position required.\n"
 #define SRC_NO_CURR_PIECE "ERROR MOVE: current location doesn't contains players' piece.\n"
@@ -38,7 +36,6 @@ enum ReasonWinner {
 #define NEW_REP_INVALID "ERROR MOVE: new rep of joker is invalid.\n"
 
 #define MOVES_WITHOUT_FIGHT_LIMIT 100
-
 
 class RPSGame {
 
@@ -80,7 +77,6 @@ public:
     void initGame(); // init the game
     void playGame(); //play the game
     void endGame(); // end the game (by writing all details to output file)
-    bool getIsGameOver() const;
 
 private:
 
@@ -88,8 +84,7 @@ private:
     void checkGameStatusAfterInit(); //checks the status of the game right after init phase
 
     //helper function for initGame and playGame:
-    void updateGameAfterFight(shared_ptr<RPSPiece>& piece_curr_player, shared_ptr<RPSPiece>& piece_opp_player, RPSPoint fight_pos); //update the game and pieces after fight occur
-
+    void updateGameAfterFight(shared_ptr<RPSPiece> piece_curr_player, shared_ptr<RPSPiece> piece_opp_player, RPSPoint fight_pos); //update the game and pieces after fight occur
     //validity regular moves tests
     bool isMoveOnBoard(int src_row, int src_col, int dst_row, int dst_col); //return true iff all the indices are inside board
     bool isInBoard(int row, int col) const; //helper function for isMoveOnBoard
