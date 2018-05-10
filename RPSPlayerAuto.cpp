@@ -12,6 +12,11 @@ int RPSPlayerAuto::getNumMovingPieces() const {
     return num_all_pieces;
 }
 
+int RPSPlayerAuto::getOpponentMovingPieces() const {
+    int num_all_pieces = this->opponentPieces.find(JOKER)->second + this->opponentPieces.find(SCISSOR)->second+this->opponentPieces.find(PAPER)->second+this->opponentPieces.find(ROCK)->second;
+    return num_all_pieces;
+}
+
 void RPSPlayerAuto::setPieceOnBoard(char piece, bool is_joker, int row, int col) {
 
     RPSPoint piece_loc(col, row);
@@ -130,7 +135,7 @@ void RPSPlayerAuto::notifyOnInitialBoard(const Board &b, const std::vector<uniqu
         for (int j = 0; j < BOARD_COLS; j++) {
             RPSPoint cur_point(i,j);
             if (b.getPlayer(cur_point) == opponentPlayer) {
-                setPieceOnBoard(UNKNOWN_PIECE, false, i, j);
+                //setPieceOnBoard(UNKNOWN_PIECE, false, i, j);
                 this->m_opponent_total++;
                 this->unknownOpponentPieces.push_back(make_unique<RPSPoint>(i,j));
             }
@@ -153,25 +158,15 @@ void RPSPlayerAuto::notifyOnOpponentMove(const Move &move) {
     removeFromVector(2, move_to);
     // destination - unknown moving character '?'
     // if this position is inside the vector known - use the char
-    setPieceOnBoard(UNKNOWN_PIECE, false, move.getTo().getX(), move.getTo().getY());
+    RPSPoint move_from(move.getFrom().getX(), move.getFrom().getY());
+    char piece = this->getPieceFromBoard(move_from);
+    // set the move on out board
+    setPieceOnBoard(piece, false, move.getTo().getX(), move.getTo().getY());
     RPSPoint src_pos(move.getFrom().getX(), move.getFrom().getY());
 
 }
 
 void RPSPlayerAuto::notifyFightResult(const FightInfo &fightInfo) {
-//    if (this->m_num_player == fightInfo.getWinner()) {
-//        setPieceOnBoard(fightInfo.getPiece(this->m_num_player), false, fightInfo.getPosition().getX(), fightInfo.getPosition().getY());
-//
-//    } else if (fightInfo.getWinner() == TIE) {
-//        int opponentPlayer = this->m_num_player == 1 ? 0 : 1;
-//        this->m_my_board[fightInfo.getPosition().getX()][fightInfo.getPosition().getY()] = nullptr;
-//        this->myPieces[fightInfo.getPiece(this->m_num_player)]--;
-//        this->opponentPieces[fightInfo.getPiece(opponentPlayer)]--;
-//        RPSPoint opp_piece(fightInfo.getPosition().getX(), fightInfo.getPosition().getY());
-//        this->unknownOpponentPieces.erase(remove(this->unknownOpponentPieces.begin(), this->unknownOpponentPieces.end(),opp_piece),this->unknownOpponentPieces.end());
-//    } else {
-//
-//    }
     int opponentPlayer = this->m_num_player == 1 ? 0 : 1;
     char oppPiece = fightInfo.getPiece(opponentPlayer);
     //Point fight_place = fight->getPosition();
@@ -185,7 +180,6 @@ void RPSPlayerAuto::notifyFightResult(const FightInfo &fightInfo) {
         this->opponentPieces[oppPiece]--;
         // remove form unknown
         removeFromVector(2, fight_place);
-        //this->unknownOpponentPieces.erase(remove(this->unknownOpponentPieces.begin(),this->unknownOpponentPieces.end(), fight_place), this->unknownOpponentPieces.end());
 
     } else if (fightInfo.getWinner() == opponentPlayer) { //opponent player won
         this->myPieces[fightInfo.getPiece(this->m_num_player)]--;
@@ -211,9 +205,102 @@ void RPSPlayerAuto::notifyFightResult(const FightInfo &fightInfo) {
 }
 
 unique_ptr<Move> RPSPlayerAuto::getMove() {
-    return unique_ptr<Move>();
+    // RPSMove move(RPSPoint(-1,-1), RPSPoint(-1,-1));
+    RPSMove move = this->getBestMove();
+    unique_ptr<Move> move_ptr = make_unique<RPSMove>(RPSPoint(move.getFrom().getX(), move.getFrom().getY()), RPSPoint(move.getTo().getX(), move.getTo().getY()));
+    return move_ptr;
 }
 
+RPSMove RPSPlayerAuto::getBestMove() {
+    RPSMove bestMove(RPSPoint(-1,-1), RPSPoint(-1,-1));
+    int my_pieces = this->getNumMovingPieces();
+    RPSPoint opp(move.getTo().getX(), move.getTo().getY());
+    char opp_piece = getPieceFromBoard(opp);
+    RPSPoint cur(move.getFrom().getX(), move.getFrom().getY());
+    char cur_piece = getPieceFromBoard(cur);
+    // calculate score of the opponent piece:
+    int not_known_opp = this->unknownOpponentPieces.size();
+    // --> if we have more unknown than knwon- it's good because there are higher chances it's a flag
+    int opp_score = this->myPieces.find(FLAG)->second*5  + not_known_opp*20 - (this->getOpponentMovingPieces() - not_known_opp)*10;
+
+    int inf_min = std::numeric_limits<int>::min();
+
+    int max_score = inf_min;
+
+    // now iterate over my pieces:
+    for (const unique_ptr<RPSPoint>& myPiece : this->myMovingPieces) {
+        vector<RPSMove> movesForPiece;
+        getLegalMoves(*myPiece, movesForPiece);
+        char pieceType = this->getPieceFromBoard(*myPiece);
+        for (RPSMove cur_move : movesForPiece) {
+            int scoreMove = this->getScoreForMove(cur_move, pieceType);
+            if (scoreMove > max_score) {
+                max_score = scoreMove;
+                bestMove = cur_move;
+            }
+        }
+    }
+    return bestMove;
+}
+
+void RPSPlayerAuto::getLegalMoves(RPSPoint piece_point, std::vector<RPSMove> &vectorToFill) {
+    // UP
+    RPSPoint point_up(piece_point.getX() + 1, piece_point.getY());
+    if (this->checkValidMove(point_up)) {
+        RPSMove move_up(RPSPoint(piece_point.getX(), piece_point.getY()), point_up);
+        vectorToFill.push_back(move_up);
+    }
+    // RIGHT
+    RPSPoint point_right(piece_point.getX(), piece_point.getY() + 1);
+    if (this->checkValidMove(point_right)) {
+        RPSMove move_right(RPSPoint(piece_point.getX(), piece_point.getY()), point_right);
+    }
+    // DOWN
+    RPSPoint point_down(piece_point.getX() - 1, piece_point.getY());
+    if (this->checkValidMove(point_down)) {
+        RPSMove move_right(RPSPoint(piece_point.getX(), piece_point.getY()), point_down);
+    }
+    // LEFT
+    RPSPoint point_left(piece_point.getX(), piece_point.getY() - 1);
+    if (this->checkValidMove(point_left)) {
+        RPSMove move_right(RPSPoint(piece_point.getX(), piece_point.getY()), point_left);
+    }
+}
+
+
+bool RPSPlayerAuto::checkValidMove(RPSPoint point) {
+    return point.getX() >= 0 && point.getX() < BOARD_ROWS && point.getY() >= 0 && point.getY() < BOARD_COLS;
+}
+
+int RPSPlayerAuto::getScoreForMove(RPSMove move , char myPiece) {
+    int score = 0;
+    int inf_min = std::numeric_limits<int>::min();
+    // first check if there is a piece there
+    if (this->m_my_board[move.getTo().getX()][move.getTo().getY()] == nullptr) {
+        score += 100;
+    } else {
+        int player_to = this->m_my_board[move.getTo().getX()][move.getTo().getY()]->getNumPlayer();
+        // first check if there is a piece of ours there
+        if (this->m_num_player == player_to) {
+            score += inf_min;
+            return score;
+        }
+        // create fight
+        char oppPiece = this->m_my_board[move.getTo().getX()][move.getTo().getY()]->getPiece();
+        RPSFight fight(myPiece, oppPiece, RPSPoint(move.getTo().getX(), move.getTo().getY()), this->m_num_player);
+        if (fight.getWinner() == this->m_num_player) {
+            // 2 cases - if the number of my pieces is less than 1/4 of the pieces - not attack (it might be joker)
+            if (this->getNumMovingPieces() < 0.5*NUM_OF_PIECES) {
+                score += 10;
+            } else {
+                score += 10000;
+            }
+        } else { // wer'e losing or it's a tie
+            score += inf_min;
+        }
+    }
+    return score;
+}
 unique_ptr<JokerChange> RPSPlayerAuto::getJokerChange() {
     return unique_ptr<JokerChange>();
 }
@@ -245,10 +332,10 @@ char RPSPlayerAuto::getPieceFromBoard(Point& pos){
 //}
 
 void RPSPlayerAuto::removeFromVector(int type_vector, const RPSPoint& pos) {
-    // type_vector == 1 -> known, 2 -> unknown
+    // type_vector == 1 -> my moving pieces, 2 -> unknown
     if (type_vector == 1) {
         // remove from vector with lambda function
-        remove_if(this->knownOpponentPieces.begin(), this->knownOpponentPieces.end(), [pos] (const unique_ptr<RPSPoint> &cur_pos) {
+        remove_if(this->myMovingPieces.begin(), this->myMovingPieces.end(), [pos] (const unique_ptr<RPSPoint> &cur_pos) {
             return (pos.getX() == cur_pos->getX()) && (pos.getY() == cur_pos->getY());
         });
     } else if (type_vector == 2) {

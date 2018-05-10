@@ -5,13 +5,13 @@
 #include "RPSPiece.h"
 #include "RPSPosChecker.h"
 #include "RPSFight.h"
+#include "RPSMove.h" //TODO: URI
 
 #include <random>
 #include <algorithm>
 #include <vector>
 #include <map>
 
-#define UNKNOWN_PIECE '?'
 
 using namespace std;
 class RPSPlayerAuto : public PlayerAlgorithm {
@@ -28,7 +28,7 @@ private:
 
     //information about the opponent player
     vector <unique_ptr<RPSPoint>> unknownOpponentPieces;
-    vector <unique_ptr<RPSPoint>> knownOpponentPieces;
+    vector <unique_ptr<RPSPoint>> myMovingPieces;
 
     std::map <char, int> myPieces = {
             {PAPER, 0},
@@ -49,7 +49,7 @@ private:
 public:
 
 
-    RPSPlayerAuto(int num_player) :m_num_player(num_player), m_num_of_jokers_can_move(0), m_opponent_total(0), unknownOpponentPieces(), knownOpponentPieces() {
+    RPSPlayerAuto(int num_player) :m_num_player(num_player), m_num_of_jokers_can_move(0), m_opponent_total(0), unknownOpponentPieces(), myMovingPieces() {
         //init m_my_board with nullptr
         for (int i = 0; i < BOARD_ROWS; i++) {
             for (int j = 0; j < BOARD_COLS; j++)
@@ -60,6 +60,7 @@ public:
     //getters
     int getM_num_of_flags() const;
     int getNumMovingPieces() const;
+    int getOpponentMovingPieces() const;
 
 
     //functions form abstract class
@@ -78,6 +79,10 @@ public:
     // helper functions
     char getPieceFromBoard(Point& position);
     void removeFromVector(int type_vector, const RPSPoint& pos);
+    RPSMove getBestMove();
+    bool checkValidMove(RPSPoint);
+    int getScoreForMove(RPSMove move, char myPiece);
+    void getLegalMoves(RPSPoint, std::vector<RPSMove> &vectorToFill);
     friend class RPSGame;
 
 

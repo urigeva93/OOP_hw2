@@ -12,7 +12,7 @@
 #define NUM_OF_BOMBS 2
 #define NUM_OF_JOKERS 2
 #define NUM_OF_FLAGS 1
-
+#define NUM_OF_PIECES NUM_OF_ROCKS+NUM_OF_PAPERS+NUM_OF_SCISSORS+NUM_OF_BOMBS+NUM_OF_JOKERS+NUM_OF_FLAGS
 using namespace std;
 
 enum PosMsg {

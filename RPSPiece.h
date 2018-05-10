@@ -12,6 +12,8 @@
 #define JOKER 'J'
 #define FLAG 'F'
 #define NEUTRAL_CHAR '#'
+#define UNKNOWN_PIECE '?'
+
 
 //board size
 #define BOARD_ROWS 10
