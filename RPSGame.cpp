@@ -1,5 +1,57 @@
 #include "RPSGame.h"
+void RPSGame::printBoardToCout(){
+    cout << "here" << endl;
+//    for (int i = -1; i < BOARD_ROWS; i++) {
+//        for (int j = -1; j < BOARD_COLS; j++) {
+//
+//            if (this->m_board.m_game_board[i][j] == nullptr)
+//                cout << " ";
+//            else if (this->m_board.m_game_board[i][j]->m_is_joker == false) { //regular piece
+//                if (this->m_board.m_game_board[i][j]->m_num_player == PLAYER_1) //Capital letters
+//                    cout << this->m_board.m_game_board[i][j]->m_symbol;
+//                else
+//                    cout << (char) std::tolower(this->m_board.m_game_board[i][j]->m_symbol);
+//            } else { //joker piece
+//                if (this->m_board.m_game_board[i][j]->m_num_player == PLAYER_1) //Capital letters
+//                    cout << JOKER;
+//                else
+//                    cout << (char) std::tolower(JOKER);
+//            }
+//        }
+//        cout << endl;
+//    }
+    for (int r = BOARD_ROWS-1; r >= 0 ; r--) {
+        // Draw dashed line
+        cout << "--+";
+        for (int c = 0; c < BOARD_COLS; c++)
+            cout << "---+";
+        cout << "\n";
 
+        // Draw board contents
+        cout << r << " | ";
+        for (int c = 0; c < BOARD_COLS; c++)
+            if (this->m_board.m_game_board[r][c] == nullptr)
+                cout << " " << " | " ;
+            else if (this->m_board.m_game_board[r][c]->m_num_player == PLAYER_1) //Capital letters
+                cout << this->m_board.m_game_board[r][c]->m_symbol  << " | ";
+             else
+                 cout << (char) std::tolower(this->m_board.m_game_board[r][c]->m_symbol)  << " | ";
+        cout << "\n";
+    }
+    // Draw dashed line
+    cout << "--+";
+    for (int c = 0; c < BOARD_COLS; c++)
+        cout << "---+";
+    cout << "\n";
+
+    // Draw column numbers
+    cout << "    ";
+    for (int c = 0; c < BOARD_COLS; c++)
+        cout << c << "   ";
+    cout << "\n\n";
+    cout << "here" << endl;
+
+}
 void RPSGame::initGame() {
 
     //ask from players their init pos
@@ -9,9 +61,17 @@ void RPSGame::initGame() {
     vector<unique_ptr<PiecePosition>> pos_player_2;
     this->m_algo_player2->getInitialPositions(PLAYER_2, pos_player_2);
 
+    for (const unique_ptr<PiecePosition>& pos: pos_player_1)
+        cout << "PLAYER 1 " << pos->getPiece() << " " << pos->getPosition().getX() << ',' <<  pos->getPosition().getY() << endl;
+
+    for (const unique_ptr<PiecePosition>& pos: pos_player_2)
+        cout << "PLAYER 2 " << pos->getPiece() << pos->getPosition().getX() << ',' <<  pos->getPosition().getY() << endl;
+
     //check players' pos validity
     RPSPosChecker checker_player1;
     RPSPosChecker checker_player2;
+
+
     checker_player1.checkInitPos(pos_player_1);
     checker_player2.checkInitPos(pos_player_2);
 
@@ -30,14 +90,16 @@ void RPSGame::initGame() {
     }
     if (checker_player1.getPosMsg() != POS_SUCCESS &&
         checker_player2.getPosMsg() == POS_SUCCESS) { //only player 1 with invalid position
-        this->m_reason_winner = BAD_POS_BOTH_PLAYERS;
-        this->m_winner = TIE;
+        this->m_reason_winner = BAD_POS_PLAYER_ONE;
+        this->m_winner = PLAYER_2;
         this->m_game_over = true;
         this->m_bad_input_index1 = checker_player1.getInvalidNumPiece();
         return;
     }
     if (checker_player1.getPosMsg() == POS_SUCCESS &&
         checker_player2.getPosMsg() != POS_SUCCESS) { //only player 2 with invalid position
+
+
         this->m_reason_winner = BAD_POS_PLAYER_TWO;
         this->m_winner = PLAYER_1;
         this->m_game_over = true;
@@ -658,7 +720,9 @@ void RPSGame::playGame() {
 
     //main loop game
     while (this->m_game_over == false && ((!player1_moves_over || !player2_moves_over))) {
-
+        cout << "main loop game" << endl;
+        //this->printBoardToCout();
+        //this->m_board.printBoard(this->m_output_file);
         //check if number of moves without a fight is bigger than limit and if so end the game with tie.
         if (count_moves_till_fight > MOVES_WITHOUT_FIGHT_LIMIT) {
             this->m_reason_winner = MOVES_LIMIT_NO_FIGHT;
@@ -715,9 +779,9 @@ void RPSGame::playGame() {
                                 this->m_current_player);
 
             if (player1_current)
-                this->m_algo_player1->notifyFightResult(curr_fight);
-            else
                 this->m_algo_player2->notifyFightResult(curr_fight);
+            else
+                this->m_algo_player1->notifyFightResult(curr_fight);
 
             count_moves_till_fight = 0;
         }
@@ -758,7 +822,7 @@ void RPSGame::playGame() {
         //check game status after move and change player turn
         checkGameStatus();
         changeCurrentPlayer();
-
+        cout << "=== moves till fight === " << count_moves_till_fight << endl;
     } //end loop game
 
     //check if both moves finished and there is still no winner

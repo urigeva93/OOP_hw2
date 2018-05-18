@@ -59,7 +59,6 @@ bool RPSPosChecker::isValidPieceType(char piece, bool is_joker_rep) {
 }
 
 bool RPSPosChecker::checkAndUpdateNumPiece(char piece) {
-
     switch (piece) {
         case ROCK:
             if (this->m_num_of_rocks < NUM_OF_ROCKS) {
@@ -177,8 +176,8 @@ void RPSPosChecker::checkInitPos(std::vector <unique_ptr<PiecePosition>>& initPo
     }
 
     if(allFlagsSet() == false) {
-        printVerboseMsg(EXCEED_NUM_OF_PIECE);
-        UPDATE_STATUS(EXCEED_NUM_OF_PIECE, index_piece);
+        printVerboseMsg(MISS_FLAG_PIECE);
+        UPDATE_STATUS(MISS_FLAG_PIECE, index_piece);
         return;
     }
 

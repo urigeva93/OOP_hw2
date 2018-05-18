@@ -19,6 +19,7 @@
 #define BOARD_ROWS 10
 #define BOARD_COLS 10
 
+using namespace std;
 class RPSPiece : public PiecePosition {
 
 private:
@@ -47,6 +48,7 @@ public:
     }
 
     virtual char getPiece() const override {
+//        std::cout << "In get piece: " << this->m_symbol << endl;
         if (this->m_is_joker)
             return JOKER;
 

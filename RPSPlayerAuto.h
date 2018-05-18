@@ -25,7 +25,7 @@ private:
     int m_num_player;
     int m_num_of_jokers_can_move;
 
-
+    RPSMove m_current_move;
     //information about the opponent player
     vector <unique_ptr<RPSPoint>> unknownOpponentPieces;
     vector <unique_ptr<RPSPoint>> myMovingPieces;
@@ -49,12 +49,13 @@ private:
 public:
 
 
-    RPSPlayerAuto(int num_player) :m_num_player(num_player), m_num_of_jokers_can_move(0), m_opponent_total(0), unknownOpponentPieces(), myMovingPieces() {
+    RPSPlayerAuto(int num_player) :m_num_player(num_player), m_num_of_jokers_can_move(0), m_opponent_total(0), unknownOpponentPieces(), myMovingPieces(), m_current_move(RPSPoint(-1,-1), RPSPoint(-1,-1)) {
         //init m_my_board with nullptr
         for (int i = 0; i < BOARD_ROWS; i++) {
             for (int j = 0; j < BOARD_COLS; j++)
                 this->m_my_board[i][j] = nullptr;
         }
+        // init current move to (-1,-1)->(-1,-1)
     }
 
     //getters
@@ -73,16 +74,21 @@ public:
 
     //get initial_pos helper
     void setPieceOnBoard(char piece, bool is_joker, int row, int col);
+    void setOppPieceInBoard(char piece, bool is_joker, int row, int col);
     //bool checkAndUpdateNumPiece(char piece);
     void updateNumPiece(char piece);
 
     // helper functions
     char getPieceFromBoard(Point& position);
     void removeFromVector(int type_vector, const RPSPoint& pos);
+    void addToMovingVector(const RPSMove& pos);
     RPSMove getBestMove();
     bool checkValidMove(RPSPoint);
     int getScoreForMove(RPSMove move, char myPiece);
     void getLegalMoves(RPSPoint, std::vector<RPSMove> &vectorToFill);
+
+    void updateSharedBoard(RPSMove move, RPSPoint& fight_place);
+    void printBoardToCout();
     friend class RPSGame;
 
 

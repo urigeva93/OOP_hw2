@@ -78,7 +78,8 @@ public:
     void playGame(); //play the game
     void endGame(); // end the game (by writing all details to output file)
 
-private:
+    void printBoardToCout();
+    // TODO: change back to private:
 
     void checkGameStatus(); //checks the status of the game (if there is a winner or a tie)
     void checkGameStatusAfterInit(); //checks the status of the game right after init phase
@@ -105,6 +106,8 @@ private:
 
     //helper function to endGame() function
     void printReasonWinner(); //print reason of the winner (assumed offset of output file exists!)
+
+
 };
 
 
