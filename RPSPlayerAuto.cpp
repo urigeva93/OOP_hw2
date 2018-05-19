@@ -14,12 +14,12 @@ void RPSPlayerAuto::printBoardToCout() {
         // Draw board contents
         cout << r << " | ";
         for (int c = 0; c < BOARD_COLS; c++)
-            if (this->m_my_board[c][r] == nullptr)
+            if (this->m_my_board[r][c] == nullptr)
                 cout << " " << " | ";
-            else if (this->m_my_board[c][r]->getNumPlayer() == PLAYER_1) //Capital letters
-                cout << this->m_my_board[c][r]->getPiece() << " | ";
+            else if (this->m_my_board[r][c]->getNumPlayer() == PLAYER_1) //Capital letters
+                cout << this->m_my_board[r][c]->getPiece() << " | ";
             else
-                cout << (char) std::tolower(this->m_my_board[c][r]->getPiece()) << " | ";
+                cout << (char) std::tolower(this->m_my_board[r][c]->getPiece()) << " | ";
         cout << "\n";
     }
     // Draw dashed line
@@ -76,32 +76,32 @@ void RPSPlayerAuto::getInitialPositions(int player, std::vector<unique_ptr<Piece
     int total_pieces = NUM_OF_BOMBS+NUM_OF_PAPERS+NUM_OF_FLAGS+NUM_OF_JOKERS+NUM_OF_ROCKS+NUM_OF_SCISSORS-2;
     if (player == PLAYER_1) {
         // set the flag on the board - left upper point
-        setPieceOnBoard(FLAG, false, 0, BOARD_COLS-1);
+        setPieceOnBoard(FLAG, false, BOARD_COLS-1,0);
         vectorToFill.push_back(std::move(make_unique<RPSPiece>(FLAG, false, this->m_num_player, RPSPoint(0,BOARD_COLS-1))));
         updateNumPiece(FLAG);
         // set the bombs around
-        setPieceOnBoard(BOMB, false, 1, BOARD_COLS-1);
+        setPieceOnBoard(BOMB, false,  BOARD_COLS-1,1);
         vectorToFill.push_back(std::move(make_unique<RPSPiece>(BOMB, false, this->m_num_player, RPSPoint(1,BOARD_COLS-1))));
         updateNumPiece(BOMB);
 
         if (NUM_OF_BOMBS > 1) {
-            setPieceOnBoard(BOMB, false, 0, BOARD_COLS-2);
+            setPieceOnBoard(BOMB, false, BOARD_COLS-2, 0);
             vectorToFill.push_back(std::move(make_unique<RPSPiece>(BOMB, false, this->m_num_player, RPSPoint(0,BOARD_COLS-2))));
             updateNumPiece(BOMB);
             total_pieces--;
         }
     } else if (player == PLAYER_2) {
         // set the flag on the board - left upper point
-        setPieceOnBoard(FLAG, false, BOARD_ROWS-1, 0);
-        vectorToFill.push_back(std::move(make_unique<RPSPiece>(FLAG, false, this->m_num_player, RPSPoint(BOARD_ROWS-1,0))));
+        setPieceOnBoard(FLAG, false,  0, BOARD_ROWS-1);
+        vectorToFill.push_back(std::move(make_unique<RPSPiece>(FLAG, false, this->m_num_player, RPSPoint(BOARD_ROWS-1, 0))));
         updateNumPiece(FLAG);
         // set the bombs around
-        setPieceOnBoard(BOMB, false, BOARD_ROWS-2, 0);
-        vectorToFill.push_back(std::move(make_unique<RPSPiece>(BOMB, false, this->m_num_player, RPSPoint(BOARD_ROWS-2,0))));
+        setPieceOnBoard(BOMB, false, 0, BOARD_ROWS-2);
+        vectorToFill.push_back(std::move(make_unique<RPSPiece>(BOMB, false, this->m_num_player, RPSPoint(BOARD_ROWS-2, 0))));
         updateNumPiece(BOMB);
 
         if (NUM_OF_BOMBS > 1) {
-            setPieceOnBoard(BOMB, false, BOARD_ROWS-1, 1);
+            setPieceOnBoard(BOMB, false, 1, BOARD_ROWS-1);
             vectorToFill.push_back(std::move(make_unique<RPSPiece>(BOMB, false, this->m_num_player, RPSPoint(BOARD_ROWS-1, 1))));
             updateNumPiece(BOMB);
             total_pieces--;
@@ -131,6 +131,7 @@ void RPSPlayerAuto::getInitialPositions(int player, std::vector<unique_ptr<Piece
 
 
     //shuffle the coordinates
+    //std::srand(std::time(0));
     auto rng = std::default_random_engine {};
     random_shuffle(coords.begin(), coords.end());
     //shuffle(begin(coords), end(coords), rng);
@@ -142,41 +143,51 @@ void RPSPlayerAuto::getInitialPositions(int player, std::vector<unique_ptr<Piece
     int index = 0;
     while (this->myPieces[PAPER] < NUM_OF_PAPERS) {
         pair<int, int> pos = coordsPositions[index];
-        setPieceOnBoard(PAPER, false ,pos.first, pos.second);
-        vectorToFill.push_back(std::move(make_unique<RPSPiece>(PAPER, false, this->m_num_player, RPSPoint(pos.first, pos.second))));
+        int row = pos.second;
+        int col = pos.first;
+        setPieceOnBoard(PAPER, false , row, col);
+        vectorToFill.push_back(std::move(make_unique<RPSPiece>(PAPER, false, this->m_num_player, RPSPoint(col,row))));
         updateNumPiece(PAPER);
-        this->myMovingPieces.push_back(make_unique<RPSPoint> (pos.first, pos.second));
+        this->myMovingPieces.push_back(make_unique<RPSPoint> (col,row));
         index++;
 
     }
     while (this->myPieces[SCISSOR] < NUM_OF_SCISSORS) {
         pair<int, int> pos = coordsPositions[index];
-        setPieceOnBoard(SCISSOR, false ,pos.first, pos.second);
-        vectorToFill.push_back(std::move(make_unique<RPSPiece>(SCISSOR, false, this->m_num_player, RPSPoint(pos.first, pos.second))));
+        int row = pos.second;
+        int col = pos.first;
+        setPieceOnBoard(SCISSOR, false ,row, col);
+        vectorToFill.push_back(std::move(make_unique<RPSPiece>(SCISSOR, false, this->m_num_player, RPSPoint(col, row))));
         updateNumPiece(SCISSOR);
-        this->myMovingPieces.push_back(make_unique<RPSPoint> (pos.first, pos.second));
+        this->myMovingPieces.push_back(make_unique<RPSPoint> (col, row));
         index++;
     }
 
     while (this->myPieces[ROCK] < NUM_OF_ROCKS) {
         pair<int, int> pos = coordsPositions[index];
-        setPieceOnBoard(ROCK, false ,pos.first, pos.second);
-        vectorToFill.push_back(std::move(make_unique<RPSPiece>(ROCK, false, this->m_num_player, RPSPoint(pos.first, pos.second))));
+        int row = pos.second;
+        int col = pos.first;
+        setPieceOnBoard(ROCK, false , row, col);
+        vectorToFill.push_back(std::move(make_unique<RPSPiece>(ROCK, false, this->m_num_player, RPSPoint(col, row))));
         updateNumPiece(ROCK);
-        this->myMovingPieces.push_back(make_unique<RPSPoint> (pos.first, pos.second));
+        this->myMovingPieces.push_back(make_unique<RPSPoint> (col, row));
         index++;
     }
     while (this->myPieces[BOMB] < NUM_OF_BOMBS) {
         pair<int, int> pos = coordsPositions[index];
-        setPieceOnBoard(BOMB, false ,pos.first, pos.second);
-        vectorToFill.push_back(std::move(make_unique<RPSPiece>(BOMB, false, this->m_num_player, RPSPoint(pos.first, pos.second))));
+        int row = pos.second;
+        int col = pos.first;
+        setPieceOnBoard(BOMB, false , row, col);
+        vectorToFill.push_back(std::move(make_unique<RPSPiece>(BOMB, false, this->m_num_player, RPSPoint(col, row))));
         updateNumPiece(BOMB);
         index++;
     }
     while (this->myPieces[FLAG] < NUM_OF_FLAGS) {
         pair<int, int> pos = coordsPositions[index];
-        setPieceOnBoard(FLAG, false ,pos.first, pos.second);
-        vectorToFill.push_back(std::move(make_unique<RPSPiece>(FLAG, false, this->m_num_player, RPSPoint(pos.first, pos.second))));
+        int row = pos.second;
+        int col = pos.first;
+        setPieceOnBoard(FLAG, false ,row, col);
+        vectorToFill.push_back(std::move(make_unique<RPSPiece>(FLAG, false, this->m_num_player, RPSPoint(col, row))));
         updateNumPiece(FLAG);
         index++;
     }
@@ -193,11 +204,11 @@ void RPSPlayerAuto::notifyOnInitialBoard(const Board &b, const std::vector<uniqu
     int opponentPlayer = this->m_num_player == 1 ? 2 : 1;
     for (int i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
-            RPSPoint cur_point(i,j);
+            RPSPoint cur_point(j,i);
             if (b.getPlayer(cur_point) == opponentPlayer) {
                 setOppPieceInBoard(UNKNOWN_PIECE, false, i, j);
                 this->m_opponent_total++;
-                this->unknownOpponentPieces.push_back(make_unique<RPSPoint>(i,j));
+                this->unknownOpponentPieces.push_back(make_unique<RPSPoint>(j,i));
             }
         }
     }
@@ -211,25 +222,31 @@ void RPSPlayerAuto::notifyOnInitialBoard(const Board &b, const std::vector<uniqu
 
 
 void RPSPlayerAuto::notifyOnOpponentMove(const Move &move) {
-    cout << "notify on opponent move! player:" << this->m_num_player << "move:" << move.getFrom().getX() << "," << move.getFrom().getY() << "-->" << move.getTo().getX()<<","<< move.getTo().getY()<<endl;
+    cout << "notify on opponent move! player:" << this->m_num_player << "move:" << move.getFrom().getY() << "," << move.getFrom().getX() << "-->" << move.getTo().getY()<<","<< move.getTo().getX() << endl;
     // update our board accordingly
-    const RPSPoint move_to(move.getTo().getX(), move.getTo().getY());
-    RPSPoint move_from(move.getFrom().getX(), move.getFrom().getY());
+    int from_row = move.getFrom().getY();
+    int from_col = move.getFrom().getX();
+    int to_row = move.getTo().getY();
+    int to_col = move.getTo().getX();
+    const RPSPoint move_to(to_col, to_row);
+    RPSPoint move_from(from_col, from_row);
     char piece_before = this->getPieceFromBoard(move_from);
-    this->m_my_board[move.getFrom().getX()][move.getFrom().getY()] = nullptr;
+    this->m_my_board[from_row][from_col] = nullptr;
     // remove form unknown
     removeFromVector(2, move_from);
     // set the move on out
     char piece_now = piece_before == UNKNOWN_PIECE ? NEUTRAL_CHAR : piece_before;
-    setOppPieceInBoard(piece_now, false, move.getTo().getX(), move.getTo().getY());
+    setOppPieceInBoard(piece_now, false, to_row , to_col);
 }
 
 void RPSPlayerAuto::notifyFightResult(const FightInfo &fightInfo) {
     int opponentPlayer = this->m_num_player == 1 ? 2 : 1;
     char oppPiece = fightInfo.getPiece(opponentPlayer);
     //Point fight_place = fight->getPosition();
-    RPSPoint fight_place(fightInfo.getPosition().getX(), fightInfo.getPosition().getY());
-    cout << "PLAYER: " <<this->m_num_player <<"FIGHT PLACE :" << fight_place.getX() << " , " << fight_place.getY() <<endl;
+    int fight_row = fightInfo.getPosition().getY();
+    int fight_col = fightInfo.getPosition().getX();
+    RPSPoint fight_place(fight_col, fight_row);
+    cout << "PLAYER: " <<this->m_num_player <<"FIGHT PLACE : row(y)" << fight_place.getY() << " , col(x)" << fight_place.getX() <<endl;
 
     // create RPSFight
     RPSFight fight(fightInfo.getPiece(this->m_num_player), oppPiece, fight_place, this->m_num_player);
@@ -237,7 +254,7 @@ void RPSPlayerAuto::notifyFightResult(const FightInfo &fightInfo) {
         // update position on the shared board
         //this->m_my_board[fight_place.getX()][fight_place.getY()] = make_shared<RPSPiece>(fightInfo.getPiece(this->m_num_player), false, this->m_num_player, RPSPoint(fight_place.getX(), fight_place.getY()));
         //setPieceOnBoard(fightInfo.getPiece(this->m_num_player),false, )
-        this->setPieceOnBoard(fightInfo.getPiece(this->m_num_player), false, fight_place.getY() ,fight_place.getX());
+        this->setPieceOnBoard(fightInfo.getPiece(this->m_num_player), false, fight_row, fight_col);
         // update saved information
         this->m_opponent_total--;
         this->opponentPieces[oppPiece]--;
@@ -248,15 +265,15 @@ void RPSPlayerAuto::notifyFightResult(const FightInfo &fightInfo) {
         this->myPieces[fightInfo.getPiece(this->m_num_player)]--;
         // update position on the shared board
         //this->m_my_board[fight_place.getX()][fight_place.getY()] = make_shared<RPSPiece>(fightInfo.getPiece(opponentPlayer), false, opponentPlayer, RPSPoint(fight_place.getX(), fight_place.getY()));
-        setOppPieceInBoard(fightInfo.getPiece(opponentPlayer),  false, fight_place.getY(), fight_place.getX());
+        setOppPieceInBoard(oppPiece,  false, fight_row, fight_col);
         // remove form unknown
         removeFromVector(2, fight_place);
         // remove from moving vector
         removeFromVector(1, fight_place);
         cout << "Delete from moving vector:" << fight_place.getY() << " , " << fight_place.getX() <<endl;
-        cout << "MY MOVING PIECES PLAYER: " << this->m_num_player << endl;
+        cout << " MOVING PIECES for PLAYER: " << this->m_num_player << endl;
         for(const unique_ptr<RPSPoint>& pos : this->myMovingPieces) {
-            std::cout << pos->getY() << " " << pos->getX() << "\n";
+            std::cout << pos->getX() << " " << pos->getY() << "\n";
         }
 
     } else if(fightInfo.getWinner() == TIE) {
@@ -264,7 +281,7 @@ void RPSPlayerAuto::notifyFightResult(const FightInfo &fightInfo) {
         this->opponentPieces[oppPiece]--;
         this->m_opponent_total--;
         // update position on the shared board
-        this->m_my_board[fight_place.getY()][fight_place.getX()] = nullptr;
+        this->m_my_board[fight_row][fight_col] = nullptr;
         // update saved information
         // remove form unknown
         removeFromVector(2, fight_place);
@@ -276,26 +293,26 @@ void RPSPlayerAuto::notifyFightResult(const FightInfo &fightInfo) {
 void RPSPlayerAuto::updateSharedBoard(RPSMove move, RPSPoint& fight_place) {
 
 }
+
 unique_ptr<Move> RPSPlayerAuto::getMove() {
     // RPSMove move(RPSPoint(-1,-1), RPSPoint(-1,-1));
     RPSMove move = this->getBestMove();
-    unique_ptr<Move> move_ptr = make_unique<RPSMove>(RPSPoint(move.getFrom().getX(), move.getFrom().getY()), RPSPoint(move.getTo().getX(), move.getTo().getY()));
+    int from_row = move.getFrom().getY();
+    int from_col = move.getFrom().getX();
+    int to_row = move.getTo().getY();
+    int to_col = move.getTo().getX();
+    unique_ptr<Move> move_ptr = make_unique<RPSMove>(RPSPoint(from_col, from_row), RPSPoint(to_col, to_row));
     this->addToMovingVector(move);
     // update my board
-    RPSPoint src_point(move.getFrom().getX(), move.getFrom().getY());
+    RPSPoint src_point(from_col, from_row);
     char piece = getPieceFromBoard(src_point);
-    this->m_my_board[src_point.getX()][src_point.getY()] = nullptr;
-    setPieceOnBoard(piece, false, move.getTo().getX(), move.getTo().getY());
+    this->m_my_board[from_row][from_col] = nullptr;
+    setPieceOnBoard(piece, false, to_row, to_col);
     return move_ptr;
 }
 
 RPSMove RPSPlayerAuto::getBestMove() {
     RPSMove bestMove(RPSPoint(-1,-1), RPSPoint(-1,-1));
-//    int my_pieces = this->getNumMovingPieces();
-//    RPSPoint opp(bestMove.getTo().getX(), bestMove.getTo().getY());
-//    char opp_piece = getPieceFromBoard(opp);
-//    RPSPoint cur(bestMove.getFrom().getX(), bestMove.getFrom().getY());
-//    char cur_piece = getPieceFromBoard(cur);
     // calculate score of the opponent piece:
     int not_known_opp = this->unknownOpponentPieces.size();
     // --> if we have more unknown than knwon- it's good because there are higher chances it's a flag
@@ -307,7 +324,7 @@ RPSMove RPSPlayerAuto::getBestMove() {
     this->printBoardToCout();
     cout << "MY MOVING PIECES PLAYER: " << this->m_num_player << endl;
     for(const unique_ptr<RPSPoint>& pos : this->myMovingPieces) {
-        std::cout << pos->getX() << " " << pos->getY() << "\n";
+        std::cout << pos->getY() << " " << pos->getX() << "\n";
     }
 
     // now iterate over my pieces:
@@ -315,16 +332,16 @@ RPSMove RPSPlayerAuto::getBestMove() {
         vector<RPSMove> movesForPiece;
         getLegalMoves(*myPiece, movesForPiece);
         char pieceType = this->getPieceFromBoard(*myPiece);
-        cout << "for moving piece in " << pieceType << " X:" << myPiece->getX() << " Y: " << myPiece->getY() << endl;
+        cout << "for moving piece in " << pieceType << " row:" << myPiece->getY() << " col: " << myPiece->getX() << endl;
         cout << "num of valid moves:" << movesForPiece.size() << endl;
         for (RPSMove cur_move : movesForPiece) {
-            cout << " Current suggested move: " << cur_move.getFrom().getX() << "," <<cur_move.getFrom().getY() << "-->" << cur_move.getTo().getX()<<","<<cur_move.getTo().getY()<<endl;
+            cout << " Current suggested move: " << cur_move.getFrom().getY() << "," <<cur_move.getFrom().getX() << "-->" << cur_move.getTo().getY()<<","<<cur_move.getTo().getX()<<endl;
             int scoreMove = this->getScoreForMove(cur_move, pieceType);
             cout << "The score for this move:" << scoreMove << endl;
             if (scoreMove > max_score) {
                 max_score = scoreMove;
                 bestMove = cur_move;
-                cout << "=====NOW BEST:" << bestMove.getFrom().getX() << "," <<bestMove.getFrom().getY() << "-->" << bestMove.getTo().getX()<<","<<bestMove.getTo().getY()<<endl;
+                cout << "========> NOW BEST:" << bestMove.getFrom().getY() << "," <<bestMove.getFrom().getX() << "-->" << bestMove.getTo().getY()<<","<<bestMove.getTo().getX() << endl;
             }
         }
     }
@@ -333,37 +350,41 @@ RPSMove RPSPlayerAuto::getBestMove() {
 }
 
 void RPSPlayerAuto::getLegalMoves(RPSPoint piece_point, std::vector<RPSMove> &vectorToFill) {
+    int row = piece_point.getY();
+    int col = piece_point.getX();
     // UP
-    RPSPoint point_up(piece_point.getX() + 1, piece_point.getY());
+    RPSPoint point_up(col + 1, row);
     if (this->checkValidMove(point_up)) {
-        RPSMove move_up(RPSPoint(piece_point.getX(), piece_point.getY()), point_up);
+        RPSMove move_up(RPSPoint(col, row), point_up);
         vectorToFill.push_back(move_up);
     }
     // RIGHT
-    RPSPoint point_right(piece_point.getX(), piece_point.getY() + 1);
+    RPSPoint point_right(col , row + 1);
     if (this->checkValidMove(point_right)) {
-        RPSMove move_right(RPSPoint(piece_point.getX(), piece_point.getY()), point_right);
+        RPSMove move_right(RPSPoint(col, row), point_right);
         vectorToFill.push_back(move_right);
     }
     // DOWN
-    RPSPoint point_down(piece_point.getX() - 1, piece_point.getY());
+    RPSPoint point_down(col - 1, row);
     if (this->checkValidMove(point_down)) {
-        RPSMove move_down(RPSPoint(piece_point.getX(), piece_point.getY()), point_down);
+        RPSMove move_down(RPSPoint(col, row) , point_down);
         vectorToFill.push_back(move_down);
     }
     // LEFT
-    RPSPoint point_left(piece_point.getX(), piece_point.getY() - 1);
+    RPSPoint point_left(col, row - 1);
     if (this->checkValidMove(point_left)) {
-        RPSMove move_left(RPSPoint(piece_point.getX(), piece_point.getY()), point_left);
+        RPSMove move_left(RPSPoint(col, row) , point_left);
         vectorToFill.push_back(move_left);
     }
 }
 
 
 bool RPSPlayerAuto::checkValidMove(RPSPoint point) {
-    if (point.getX() >= 0 && point.getX() < BOARD_ROWS && point.getY() >= 0 && point.getY() < BOARD_COLS) {
-        if (this->m_my_board[point.getX()][point.getY()] != nullptr) {
-            int player_to = this->m_my_board[point.getX()][point.getY()]->getNumPlayer();
+    int col = point.getX();
+    int row = point.getY();
+    if (row >= 0 && row < BOARD_ROWS && col >= 0 && col < BOARD_COLS) {
+        if (this->m_my_board[row][col] != nullptr) {
+            int player_to = this->m_my_board[row][col]->getNumPlayer();
             // first check if there is a piece of ours there
             //cout << "for point: " << point.getX() << " , " << point.getY() << endl;
             //cout << "my player: " << this->m_num_player << " player_to:" << player_to << endl;
@@ -379,10 +400,16 @@ bool RPSPlayerAuto::checkValidMove(RPSPoint point) {
 
 int RPSPlayerAuto::getScoreForMove(RPSMove move , char myPiece) {
     int score = 0;
+    int from_row = move.getFrom().getY();
+    int from_col = move.getFrom().getX();
+    int to_row = move.getTo().getY();
+    int to_col = move.getTo().getX();
+
     int opponentPlayer = this->m_num_player == 1 ? 2 : 1;
     int inf_min = std::numeric_limits<int>::min();
+
     // first check if there is a piece there
-    if (this->m_my_board[move.getTo().getX()][move.getTo().getY()] == nullptr) {
+    if (this->m_my_board[to_row][to_col] == nullptr) {
         score += 5;
     } else {
 //        int player_to = this->m_my_board[move.getTo().getX()][move.getTo().getY()]->getNumPlayer();
@@ -393,13 +420,13 @@ int RPSPlayerAuto::getScoreForMove(RPSMove move , char myPiece) {
 //            return score;
 //        }
         // create fight
-        char oppPiece = this->m_my_board[move.getTo().getX()][move.getTo().getY()]->getPiece();
+        char oppPiece = this->m_my_board[to_row][to_col]->getPiece();
         if (oppPiece == '#') {
             cout << "OPP PIECE (scoring) :" << oppPiece << endl;
             score += 10;
             return score;
         }
-        RPSFight fight(myPiece, oppPiece, RPSPoint(move.getTo().getX(), move.getTo().getY()), this->m_num_player);
+        RPSFight fight(myPiece, oppPiece, RPSPoint(to_col,to_row), this->m_num_player);
         if (fight.getWinner() == this->m_num_player) {
             // 2 cases - if the number of my pieces is less than 1/4 of the pieces - not attack (it might be joker)
             if (this->getNumMovingPieces() < 0.5*NUM_OF_PIECES) {
@@ -445,7 +472,7 @@ void RPSPlayerAuto::updateNumPiece(char piece) {
 }
 char RPSPlayerAuto::getPieceFromBoard(Point& pos){
     //this->printBoardToCout();
-    return this->m_my_board[pos.getX()][pos.getY()]->getPiece();
+    return this->m_my_board[pos.getY()][pos.getX()]->getPiece();
 }
 
 //bool isPointEqual(RPSPoint a, RPSPoint b) {
@@ -470,11 +497,17 @@ void RPSPlayerAuto::removeFromVector(int type_vector, const RPSPoint& pos) {
 void RPSPlayerAuto::addToMovingVector(const RPSMove& move) {
     int x = move.getFrom().getX();
     int y = move.getFrom().getY();
+    cout << "MOVE FROM POINT: Y(row): " << y << " X(col): " << x << endl;
+    cout << "MOVE FROM POINT: Y(row): " << move.getTo().getY() << " X(col): " << move.getTo().getX() << endl;
     RPSPoint src_point(x,y);
     for (unique_ptr<RPSPoint>& point : this->myMovingPieces) {
         if (point->getX() == x && point->getY() == y) {
             this->removeFromVector(1, src_point);
             this->myMovingPieces.push_back(make_unique<RPSPoint> (move.getTo().getX(), move.getTo().getY()));
+            cout << "MOVING PIECES NOW for player " << this->m_num_player << endl;
+            for(const unique_ptr<RPSPoint>& pos : this->myMovingPieces) {
+                std::cout << pos->getY() << " " << pos->getX() << "\n";
+            }
             break;
         }
     }

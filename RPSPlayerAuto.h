@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <vector>
 #include <map>
-
+#include <cstdlib>
 
 using namespace std;
 class RPSPlayerAuto : public PlayerAlgorithm {
