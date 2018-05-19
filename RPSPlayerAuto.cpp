@@ -134,6 +134,12 @@ void RPSPlayerAuto::getInitialPositions(int player, std::vector<unique_ptr<Piece
     //std::srand(std::time(0));
     auto rng = std::default_random_engine {};
     //random_shuffle(coords.begin(), coords.end());
+    //shuffle(begin(coords), end(coords), rng);
+    std::random_device r;
+    std::seed_seq seed{r(), r(), r(), r(), r(), r(), r(), r()};
+    std::mt19937 eng(seed);
+    shuffle(coords.begin(), coords.end(), eng);
+    //random_shuffle(coords.begin(), coords.end();
     shuffle(begin(coords), end(coords), rng);
     copy(coords.begin(), coords.begin()+total_pieces, coordsPositions.begin());
     for (int i=0; i<coordsPositions.size(); i++) {
@@ -255,8 +261,6 @@ void RPSPlayerAuto::notifyFightResult(const FightInfo &fightInfo) {
         cout << "In current player won PLAYER: " <<this->m_num_player << endl;
         cout << "my piece: " << fightInfo.getPiece(this->m_num_player)<<endl;
         // update position on the shared board
-        //this->m_my_board[fight_place.getX()][fight_place.getY()] = make_shared<RPSPiece>(fightInfo.getPiece(this->m_num_player), false, this->m_num_player, RPSPoint(fight_place.getX(), fight_place.getY()));
-        //setPieceOnBoard(fightInfo.getPiece(this->m_num_player),false, )
         this->setPieceOnBoard(fightInfo.getPiece(this->m_num_player), false, fight_row, fight_col);
         // update saved information
         this->m_opponent_total--;
@@ -269,7 +273,6 @@ void RPSPlayerAuto::notifyFightResult(const FightInfo &fightInfo) {
     } else if (fightInfo.getWinner() == opponentPlayer) { //opponent player won
         this->myPieces[fightInfo.getPiece(this->m_num_player)]--;
         // update position on the shared board
-        //this->m_my_board[fight_place.getX()][fight_place.getY()] = make_shared<RPSPiece>(fightInfo.getPiece(opponentPlayer), false, opponentPlayer, RPSPoint(fight_place.getX(), fight_place.getY()));
         setOppPieceInBoard(oppPiece,  false, fight_row, fight_col);
         // remove form unknown
         removeFromVector(2, fight_place);
@@ -301,7 +304,9 @@ void RPSPlayerAuto::updateSharedBoard(RPSMove move, RPSPoint& fight_place) {
 }
 
 unique_ptr<Move> RPSPlayerAuto::getMove() {
-    // RPSMove move(RPSPoint(-1,-1), RPSPoint(-1,-1));
+    // in case there are no left moving pieces
+    if (this->myMovingPieces.size() == 0)
+        return nullptr;
     RPSMove move = this->getBestMove();
     int from_row = move.getFrom().getY();
     int from_col = move.getFrom().getX();

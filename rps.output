@@ -1,5 +1,5 @@
-Winner: 1
-Reason: All moving PIECEs of the opponent are eaten
+Winner: 0
+Reason: A tie - no fight occurred for move than 100 turns
 
         bf
          b
@@ -9,5 +9,5 @@ Reason: All moving PIECEs of the opponent are eaten
           
           
           
-B         
+B       p 
 FB       P
