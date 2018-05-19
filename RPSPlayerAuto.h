@@ -87,7 +87,6 @@ public:
     int getScoreForMove(RPSMove move, char myPiece);
     void getLegalMoves(RPSPoint, std::vector<RPSMove> &vectorToFill);
 
-    void updateSharedBoard(RPSMove move, RPSPoint& fight_place);
     void printBoardToCout();
     friend class RPSGame;
 
