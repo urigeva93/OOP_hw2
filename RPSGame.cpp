@@ -466,7 +466,7 @@ bool RPSGame::playRegularMove(int src_row, int src_col, int dst_row, int dst_col
 
         this->m_board.m_game_board[src_row][src_col] = nullptr;
     } else { //two pieces fight!
-
+        cout << "in manager two pieces fight" << endl;
         RPSPoint fight_pos(dst_col, dst_row);
         updateGameAfterFight(this->m_board.m_game_board[src_row][src_col],
                              this->m_board.m_game_board[dst_row][dst_col], fight_pos);
@@ -580,6 +580,8 @@ void RPSGame::changeCurrentPlayer() {
 }
 
 bool RPSGame::isPieceExist(int row, int col) {
+    cout << "in manager- row: " << row << " col: " << col <<endl;
+    this->printBoardToCout();
     return (this->m_board.m_game_board[row][col] != nullptr);
 }
 
@@ -773,15 +775,16 @@ void RPSGame::playGame() {
 
         //handle if was a fight
         if (was_fight) {
+            cout << "in was fight" << player1_current << endl;
             RPSPoint fight_pos(curr_move->getTo().getX(), curr_move->getTo().getY());
             RPSFight curr_fight(real_piece_type_curr,
                                 real_piece_type_opp, fight_pos,
                                 this->m_current_player);
 
             if (player1_current)
-                this->m_algo_player2->notifyFightResult(curr_fight);
-            else
                 this->m_algo_player1->notifyFightResult(curr_fight);
+            else
+                this->m_algo_player2->notifyFightResult(curr_fight);
 
             count_moves_till_fight = 0;
         }
@@ -814,9 +817,9 @@ void RPSGame::playGame() {
                                 this->m_current_player);
 
             if (player1_current)
-                this->m_algo_player1->notifyFightResult(curr_fight);
-            else
                 this->m_algo_player2->notifyFightResult(curr_fight);
+            else
+                this->m_algo_player1->notifyFightResult(curr_fight);
         }
 
         //check game status after move and change player turn
